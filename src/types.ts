@@ -330,6 +330,9 @@ export type PulsarSpatialModule =
   | 'integrations'
   | 'admin_access'
   | 'pipeline_ops'
+  | 'consent_gates'
+  | 'after_call'
+  | 'owner_dashboard'
   | 'permissions'
   | 'workspaces'
   | 'settings';

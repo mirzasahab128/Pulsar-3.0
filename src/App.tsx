@@ -1027,6 +1027,25 @@ export default function App() {
           )
         )}
 
+        {/* Visible 3.0 sidebar items only: these open the existing Admin
+            Command Center Outreach Gates tab, scrolled to the matching
+            Phase 7 section. No new screen, no restyle, and the same
+            master-admin gate as Admin Command Center itself. Non-masters
+            get the same honest unavailable panel, never the real center. */}
+        {(activeModule === 'consent_gates' || activeModule === 'after_call' || activeModule === 'owner_dashboard') && (
+          access?.isMasterAdmin ? (
+            <AdminCommandCenter
+              initialTab="outreach"
+              focusSection={activeModule === 'consent_gates' ? 'gates' : activeModule === 'after_call' ? 'aftercall' : 'owner'}
+            />
+          ) : (
+            <AdminUnavailablePanel
+              serverReachable={access !== null}
+              signedInEmail={currentUser?.email ?? profile?.email ?? null}
+            />
+          )
+        )}
+
         {/* Phases 4–6: Pipeline Ops (lead registry, notes & tasks, email
             sequences). Server routes enforce auth + plan gates. */}
         {activeModule === 'pipeline_ops' && (
@@ -1117,6 +1136,13 @@ export default function App() {
 
         {activeTab === 'call_studio' && (
           <div className="space-y-4">
+            {/* Gate-first voice flow note (3.0 only, no layout change): the
+                voice flow checks consent first, discloses that it is an AI
+                assistant, and hands over live to the owner on interest or
+                price questions. See Consent Gates in the sidebar. */}
+            <div className={`p-3 rounded-2xl border text-xs ${isDark ? 'bg-slate-900/70 border-white/[0.08] text-slate-300' : 'bg-white/85 border-slate-200 text-slate-600'}`}>
+              Gate first: consent is checked before any call, the call opens with an AI disclosure and recording notice, and interest or price questions go to a live handoff to the owner. No real call is made without a connected voice service, a key, and approval.
+            </div>
             {/* Quick Practice Selector */}
             <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs backdrop-blur-xl transition-colors duration-300 ${
               isDark 

@@ -46,10 +46,30 @@ const STATUS_STYLES: Record<string, string> = {
   disabled: 'bg-rose-500/15 text-rose-500 border-rose-500/30'
 };
 
-export const AdminCommandCenter: React.FC = () => {
+export type AdminFocusSection = 'gates' | 'aftercall' | 'owner';
+
+const FOCUS_SECTION_IDS: Record<AdminFocusSection, string> = {
+  gates: 'phase71-gates',
+  aftercall: 'phase73-aftercall',
+  owner: 'phase74-owner'
+};
+
+export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?: AdminFocusSection }> = ({ initialTab, focusSection }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [tab, setTab] = useState<AdminTab>('overview');
+  const [tab, setTab] = useState<AdminTab>(initialTab ?? 'overview');
+
+  // Deep links from the visible 3.0 sidebar items: open the Outreach Gates
+  // tab and scroll to the matching Phase 7 section. This changes no tab,
+  // button, or section, it only lands the user on the right one.
+  useEffect(() => {
+    if (!focusSection) return;
+    setTab('outreach');
+    const timer = window.setTimeout(() => {
+      document.getElementById(FOCUS_SECTION_IDS[focusSection])?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [focusSection]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -830,7 +850,7 @@ export const AdminCommandCenter: React.FC = () => {
       {/* --------------------------- Outreach Gates tab (Phase 7.1) ------------ */}
       {tab === 'outreach' && (
         <div className="space-y-4">
-          <div className={`${cardCls} p-4`}>
+          <div id="phase71-gates" className={`${cardCls} p-4`}>
             <div className="text-xs font-bold">Phase 7.1 outreach gates</div>
             <p className="text-[11px] text-slate-500 mt-1">
               Consent ledger, internal suppression list, and the fail-closed contact gate for email, voice, and SMS.
@@ -947,7 +967,7 @@ export const AdminCommandCenter: React.FC = () => {
             </div>
           </div>
 
-          <div className={`${cardCls} p-4 space-y-3`}>
+          <div id="phase73-aftercall" className={`${cardCls} p-4 space-y-3`}>
             <div className="text-xs font-bold">Phase 7.3 after-call automation</div>
             <p className="text-[11px] text-slate-500">
               Pipeline stage, follow-up task, and owner handoff summary for every completed call.
@@ -987,7 +1007,7 @@ export const AdminCommandCenter: React.FC = () => {
             </div>
           </div>
 
-          <div className={`${cardCls} p-4 space-y-3`}>
+          <div id="phase74-owner" className={`${cardCls} p-4 space-y-3`}>
             <div className="text-xs font-bold">Phase 7.4 owner dashboard</div>
             <p className="text-[11px] text-slate-500">
               At a glance: leads handed to you, hot leads, leads waiting for a callback, and

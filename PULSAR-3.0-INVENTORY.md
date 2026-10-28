@@ -213,3 +213,11 @@ Step B - Existing live site (separate step, NOT done here):
    gated on the user's keys, approvals, and the compliance review,
    exactly as in this inventory. Nothing live changes until the user
    gives a go-ahead for that exact live step.
+
+## Visible sidebar items added 2026-10-29 (3.0 only, not pushed yet)
+
+Same sidebar style, colours, and layout as the live look. Only three items added, all marked NEW:
+- Outreach, after Follow-ups and Tasks: Consent Gates, opens Admin Command Center, Outreach Gates tab, Phase 7.1 section.
+- Outreach, after Consent Gates: After-call follow-up, opens the same tab, Phase 7.3 section.
+- Administration, after Admin Command Center: Owner dashboard, opens the same tab, Phase 7.4 section.
+No existing sidebar item was removed, renamed, moved, or restyled. Calling and Voice Studio carries a short gate-first note, with no layout change. Non-master users see the same honest unavailable panel as for Admin Command Center, because the server gate still applies.

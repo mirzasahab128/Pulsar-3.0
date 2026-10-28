@@ -76,6 +76,7 @@ interface NavGroup {
     count?: number;
     badgeVariant?: 'violet' | 'cyan' | 'amber' | 'emerald';
     feature?: string;
+    isNew?: boolean;
   }>;
 }
 
@@ -131,6 +132,8 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
         { id: 'linkedin', label: 'LinkedIn Workflows', icon: Linkedin, feature: 'linkedin_workflows' },
         { id: 'conversations', label: 'Unified Conversations', icon: MessagesSquare, count: meetingNotesCount },
         { id: 'reminders', label: 'Follow-ups & Tasks', icon: Bell, count: unreadTasksCount, badgeVariant: 'amber' },
+        { id: 'consent_gates', label: 'Consent Gates', icon: ShieldCheck, isNew: true },
+        { id: 'after_call', label: 'After-call follow-up', icon: PhoneCall, isNew: true },
         { id: 'google_tasks', label: 'Google Tasks Sync', icon: CheckSquare, badgeVariant: 'cyan', feature: 'google_sync' },
         { id: 'google_forms', label: 'Google Forms & Audits', icon: ClipboardList, badgeVariant: 'cyan', feature: 'google_sync' }
       ]
@@ -155,6 +158,7 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
     {
       label: 'Administration',
       items: [
+        { id: 'owner_dashboard', label: 'Owner dashboard', icon: Users, isNew: true },
         { id: 'integrations', label: 'Integrations Matrix', icon: Network },
         { id: 'permissions', label: 'Team & Permissions', icon: Lock },
         { id: 'workspaces', label: 'Customer Workspaces', icon: Layers },
@@ -275,7 +279,7 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => handleItemClick(item)}
-                      title={locked ? 'Not in your plan' : (isCollapsed ? item.label : undefined)}
+                      title={locked ? 'Not in your plan' : (isCollapsed ? (item.isNew ? `${item.label} (NEW)` : item.label) : undefined)}
                       className={`pv-nav-btn group ${isActive ? 'active' : ''} ${locked ? 'locked' : ''}`}
                     >
                       <div className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
@@ -309,6 +313,12 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
                           {/* Theme count badge (red pill, as in the approved theme) */}
                           {item.count !== undefined && item.count > 0 && (
                             <span className="pv-count ml-2 shrink-0">{item.count > 99 ? '99+' : item.count}</span>
+                          )}
+
+                          {/* NEW marker for the visible 3.0 additions only. Uses the
+                              existing amber theme token, like the preview's NEW badge. */}
+                          {item.isNew && (
+                            <span className="ml-2 shrink-0 rounded-full bg-[var(--pv-amber-strong)] px-2 py-0.5 text-[10px] font-bold text-[#14241d]">NEW</span>
                           )}
 
                           {/* Live Indicator Dot for Active AI or Campaigns */}

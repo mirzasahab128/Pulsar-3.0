@@ -1,0 +1,273 @@
+/* ==========================================================================
+   PULSAR "GROWTH SPECTRUM" — SPATIAL LIQUID GLASS DESIGN SYSTEM
+   Apple-Style Spatial UI Tokens & Components
+   WCAG AA Contrast Compliant in Dark & Light Modes
+   ========================================================================== */
+
+:root,
+[data-theme="dark"],
+.dark {
+  /* Growth Spectrum Accent Spectrum */
+  --lg-emerald: #10B981;
+  --lg-emerald-glow: rgba(16, 185, 129, 0.28);
+  --lg-aqua: #22D3EE;
+  --lg-aqua-glow: rgba(34, 211, 238, 0.24);
+  --lg-gold: #F5B83D;
+  --lg-gold-glow: rgba(245, 184, 61, 0.24);
+  --lg-coral: #F43F5E;
+  --lg-coral-glow: rgba(244, 63, 94, 0.24);
+  --lg-violet: #8B5CF6;
+  --lg-violet-glow: rgba(139, 92, 246, 0.26);
+
+  /* Dark Mood: Night Ocean & Luminous Translucent Glass */
+  --lg-bg-base: #070F1E;
+  --lg-bg-surface: rgba(11, 22, 40, 0.72);
+  --lg-bg-card: rgba(14, 27, 49, 0.65);
+  --lg-bg-elevated: rgba(20, 36, 64, 0.82);
+  --lg-border-glass: rgba(255, 255, 255, 0.10);
+  --lg-border-glass-bright: rgba(255, 255, 255, 0.18);
+  --lg-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  
+  --lg-text-primary: #F8FAFC;
+  --lg-text-secondary: #94A3B8;
+  --lg-text-muted: #64748B;
+
+  --lg-shadow-glass: 0 20px 48px -12px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  --lg-shadow-card: 0 16px 36px -8px rgba(0, 0, 0, 0.45);
+  --lg-backdrop-blur: 26px;
+  --lg-backdrop-saturate: 185%;
+}
+
+[data-theme="light"],
+.light {
+  /* Light Mood: Morning Mint & Frosted White Glass */
+  --lg-emerald: #059669;
+  --lg-emerald-glow: rgba(5, 150, 105, 0.18);
+  --lg-aqua: #0891B2;
+  --lg-aqua-glow: rgba(8, 145, 178, 0.16);
+  --lg-gold: #D97706;
+  --lg-gold-glow: rgba(217, 119, 6, 0.16);
+  --lg-coral: #E11D48;
+  --lg-coral-glow: rgba(225, 29, 72, 0.16);
+  --lg-violet: #7C3AED;
+  --lg-violet-glow: rgba(124, 58, 237, 0.18);
+
+  --lg-bg-base: #F0FDF4;
+  --lg-bg-surface: rgba(255, 255, 255, 0.85);
+  --lg-bg-card: rgba(255, 255, 255, 0.82);
+  --lg-bg-elevated: rgba(255, 255, 255, 0.95);
+  --lg-border-glass: rgba(16, 185, 129, 0.14);
+  --lg-border-glass-bright: rgba(16, 185, 129, 0.32);
+  --lg-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+  --lg-text-primary: #0F172A;
+  --lg-text-secondary: #334155;
+  --lg-text-muted: #64748B;
+
+  --lg-shadow-glass: 0 16px 36px -8px rgba(16, 185, 129, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  --lg-shadow-card: 0 12px 28px -6px rgba(16, 185, 129, 0.06);
+  --lg-backdrop-blur: 26px;
+  --lg-backdrop-saturate: 185%;
+}
+
+/* Tabular Metrics Typography */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* Liquid Glass Cards */
+.lg-glass {
+  background: var(--lg-bg-card);
+  backdrop-filter: blur(var(--lg-backdrop-blur)) saturate(var(--lg-backdrop-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-backdrop-blur)) saturate(var(--lg-backdrop-saturate));
+  border: 1px solid var(--lg-border-glass);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight);
+  border-radius: 18px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.lg-glass:hover {
+  border-color: var(--lg-border-glass-bright);
+}
+
+/* Color Accent Variants for Tiles */
+.lg-glass-emerald {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight), 0 0 32px var(--lg-emerald-glow);
+}
+
+.lg-glass-aqua {
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight), 0 0 32px var(--lg-aqua-glow);
+}
+
+.lg-glass-gold {
+  border-color: rgba(245, 184, 61, 0.3);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight), 0 0 32px var(--lg-gold-glow);
+}
+
+.lg-glass-coral {
+  border-color: rgba(244, 63, 94, 0.3);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight), 0 0 32px var(--lg-coral-glow);
+}
+
+.lg-glass-violet {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: var(--lg-shadow-glass), var(--lg-inner-highlight), 0 0 32px var(--lg-violet-glow);
+}
+
+/* Liquid Glass Button Tokens */
+.lg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.lg-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--lg-bg-base), 0 0 0 4px var(--lg-emerald);
+}
+
+.lg-btn-primary {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 18px -4px rgba(16, 185, 129, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.lg-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #34D399, #10B981);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -4px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.lg-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.lg-btn-ghost {
+  background: var(--lg-bg-elevated);
+  color: var(--lg-text-primary);
+  border: 1px solid var(--lg-border-glass);
+}
+
+.lg-btn-ghost:hover:not(:disabled) {
+  background: var(--lg-bg-surface);
+  border-color: var(--lg-border-glass-bright);
+}
+
+/* Liquid Glass Pills & Chips */
+.lg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--lg-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.lg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--lg-bg-elevated);
+  color: var(--lg-text-secondary);
+  border: 1px solid var(--lg-border-glass);
+}
+
+/* Progress Track */
+.lg-track {
+  width: 100%;
+  height: 8px;
+  background: var(--lg-bg-elevated);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--lg-border-glass);
+}
+
+.lg-track-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Drifting Aurora Background Effect */
+.lg-aurora-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.lg-aurora-bg::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 60vw;
+  height: 60vh;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.07) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: lg-drift 22s ease-in-out infinite alternate;
+}
+
+.lg-aurora-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  right: -10%;
+  width: 50vw;
+  height: 50vh;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.06) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: lg-drift 18s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes lg-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.05); }
+  100% { transform: translate(-20px, 30px) scale(0.98); }
+}
+
+/* Accessibility: Prefers Reduced Motion & Reduced Transparency */
+@media (prefers-reduced-motion: reduce) {
+  .lg-glass,
+  .lg-btn,
+  .lg-aurora-bg::before,
+  .lg-aurora-bg::after,
+  .lg-track-bar {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .lg-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--lg-bg-elevated) !important;
+  }
+}

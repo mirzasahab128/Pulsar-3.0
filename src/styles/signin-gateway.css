@@ -1,0 +1,446 @@
+/* =========================================================================
+   Pulsar Access Gateway — "sliding split-card" design
+   A centered card with a deep-green hero panel that slides left <-> right
+   (0.65s ease-in-out) when switching between Sign In and Request Access,
+   while the two form panels cross-fade/slide on the opposite side.
+   Presentation only — all behaviour lives in SignInPage.tsx handlers.
+   ========================================================================= */
+
+.gw-root {
+  --gw-page-ink: #1d2b21;
+  --gw-page-muted: #5c6f60;
+  --gw-card-bg: #fcfdf9;
+  --gw-card-border: rgba(11, 61, 36, 0.12);
+  --gw-card-ring: rgba(255, 255, 255, 0.55);
+  --gw-card-shadow: 0 30px 80px -24px rgba(20, 45, 28, 0.35), 0 6px 20px rgba(20, 45, 28, 0.08);
+  --gw-ink: #1c2a20;
+  --gw-muted: #64755f;
+  --gw-faint: #8b9a87;
+  --gw-input-bg: #f0f3ec;
+  --gw-input-bg-focus: #ffffff;
+  --gw-input-ink: #1c2a20;
+  --gw-input-placeholder: #97a892;
+  --gw-green: #0b5d3b;
+  --gw-green-hover: #0a4e31;
+  --gw-green-ring: rgba(11, 93, 59, 0.35);
+  --gw-divider: #e2e8d9;
+  --gw-error-bg: #fdf0ef;
+  --gw-error-border: #f3c6c1;
+  --gw-error-ink: #b3372f;
+  --gw-success-bg: #e9f6ee;
+  --gw-success-border: #bfe3cb;
+  --gw-success-ink: #146c3c;
+
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  color: var(--gw-page-ink);
+  background:
+    radial-gradient(900px 480px at 12% -8%, rgba(27, 122, 74, 0.14), transparent 60%),
+    radial-gradient(820px 460px at 105% 110%, rgba(11, 93, 59, 0.12), transparent 60%),
+    linear-gradient(160deg, #f3f5ec 0%, #e9ede0 100%);
+  font-family: var(--font-sans);
+}
+
+html.dark .gw-root,
+html[data-theme='dark'] .gw-root {
+  --gw-page-ink: #e9f2e4;
+  --gw-page-muted: #93a892;
+  --gw-card-bg: #0d1a11;
+  --gw-card-border: rgba(163, 230, 190, 0.14);
+  --gw-card-ring: rgba(255, 255, 255, 0.05);
+  --gw-card-shadow: 0 34px 90px -24px rgba(0, 0, 0, 0.75), 0 6px 22px rgba(0, 0, 0, 0.45);
+  --gw-ink: #e9f2e4;
+  --gw-muted: #9db09a;
+  --gw-faint: #71856f;
+  --gw-input-bg: #16241a;
+  --gw-input-bg-focus: #1a2b1f;
+  --gw-input-ink: #eef5e9;
+  --gw-input-placeholder: #71856f;
+  --gw-green: #127a4c;
+  --gw-green-hover: #16935c;
+  --gw-green-ring: rgba(46, 204, 143, 0.4);
+  --gw-divider: #223528;
+  --gw-error-bg: rgba(244, 63, 94, 0.1);
+  --gw-error-border: rgba(244, 63, 94, 0.35);
+  --gw-error-ink: #fda4af;
+  --gw-success-bg: rgba(16, 185, 129, 0.1);
+  --gw-success-border: rgba(16, 185, 129, 0.35);
+  --gw-success-ink: #6ee7a0;
+
+  background:
+    radial-gradient(900px 480px at 12% -8%, rgba(16, 185, 129, 0.13), transparent 60%),
+    radial-gradient(820px 460px at 105% 110%, rgba(11, 93, 59, 0.22), transparent 60%),
+    linear-gradient(160deg, #0a140d 0%, #060d08 100%);
+}
+
+.gw-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+/* ---------- theme toggle ---------- */
+.gw-theme-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  padding: 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid var(--gw-card-border);
+  background: var(--gw-card-bg);
+  color: var(--gw-page-muted);
+  box-shadow: 0 4px 14px rgba(20, 45, 28, 0.12);
+  transition: color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+.gw-theme-btn:hover {
+  color: var(--gw-page-ink);
+  transform: translateY(-1px);
+}
+@media (min-width: 640px) {
+  .gw-theme-btn { top: 1.5rem; right: 1.5rem; }
+}
+
+/* ---------- brand header ---------- */
+.gw-brand { text-align: center; margin-bottom: 1.75rem; }
+.gw-brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(11, 93, 59, 0.3);
+  background: rgba(255, 255, 255, 0.45);
+  margin-bottom: 1rem;
+}
+html.dark .gw-brand-chip,
+html[data-theme='dark'] .gw-brand-chip { background: rgba(255, 255, 255, 0.04); }
+.gw-brand-chip .gw-dot {
+  width: 0.625rem; height: 0.625rem; border-radius: 9999px;
+  background: #0b5d3b; animation: gw-pulse 2s ease-in-out infinite;
+}
+.gw-brand-chip span {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #0b5d3b;
+}
+html.dark .gw-brand-chip span,
+html[data-theme='dark'] .gw-brand-chip span { color: #34d399; }
+html.dark .gw-brand-chip .gw-dot,
+html[data-theme='dark'] .gw-brand-chip .gw-dot { background: #34d399; }
+@keyframes gw-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.gw-brand-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.gw-brand-mark {
+  width: 2.75rem; height: 2.75rem; border-radius: 1rem;
+  background: linear-gradient(135deg, #0e7a4a, #0b3d24);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: 0 10px 22px -8px rgba(11, 93, 59, 0.55);
+}
+.gw-brand-name {
+  font-family: var(--font-display);
+  font-size: 1.875rem; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--gw-page-ink);
+}
+.gw-brand-tag {
+  font-size: 0.875rem; color: var(--gw-page-muted);
+  max-width: 20rem; margin: 0 auto;
+}
+
+/* ---------- the card ---------- */
+.gw-card {
+  position: relative;
+  width: min(980px, 94vw);
+  height: clamp(660px, 84vh, 800px);
+  border-radius: 28px;
+  background: var(--gw-card-bg);
+  border: 1px solid var(--gw-card-border);
+  box-shadow: 0 0 0 8px var(--gw-card-ring), var(--gw-card-shadow);
+  overflow: hidden;
+}
+
+/* ---------- hero panel (slides) ---------- */
+.gw-hero {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  width: calc(50% - 20px);
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 5;
+  background: linear-gradient(165deg, #0e4a2c 0%, #0b3d24 46%, #062315 100%);
+  transform: translateX(calc(100% + 20px)); /* sign-in / forgot: hero on the right */
+  transition: transform 0.65s ease-in-out;
+}
+.gw-card[data-mode='signup'] .gw-hero {
+  transform: translateX(0); /* request access: hero on the left */
+}
+.gw-hero::after { /* soft vignette */
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(2, 12, 6, 0.35) 100%);
+  pointer-events: none;
+}
+.gw-hero-moon {
+  position: absolute;
+  top: 15%; left: 58%;
+  width: 74px; height: 74px; border-radius: 9999px;
+  background: radial-gradient(circle at 38% 35%, #eafff1 0%, #b9e8cc 42%, rgba(185, 232, 204, 0) 72%);
+  filter: blur(1px);
+  opacity: 0.9;
+}
+.gw-hero-stars {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 12%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 30%, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 14%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 55% 8%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 40%, rgba(255, 255, 255, 0.45) 50%, transparent 51%);
+}
+.gw-hero-ridges { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 62%; }
+
+.gw-hero-brand {
+  position: absolute; top: 1.4rem; left: 1.6rem; z-index: 3;
+  display: flex; align-items: center; gap: 0.55rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.01em;
+}
+.gw-hero-brand .gw-hero-mark {
+  width: 1.9rem; height: 1.9rem; border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.gw-hero-inner {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2.5rem 2.75rem 6.5rem;
+}
+.gw-hero-content {
+  position: absolute;
+  max-width: 19rem;
+  text-align: center;
+  color: #f4faf3;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.45s ease-in-out, transform 0.45s ease-in-out, visibility 0s linear 0.45s;
+}
+.gw-hero-content.is-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.5s ease-in-out 0.22s, transform 0.5s ease-in-out 0.22s, visibility 0s;
+}
+.gw-hero-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem; font-weight: 800; letter-spacing: -0.01em;
+  margin-bottom: 0.7rem; color: #ffffff;
+}
+.gw-hero-text { font-size: 0.92rem; line-height: 1.55; color: rgba(235, 248, 238, 0.78); margin-bottom: 1.6rem; }
+.gw-hero-btn {
+  display: inline-block;
+  padding: 0.72rem 2.3rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  color: #f9f9f9;
+  font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.gw-hero-btn:hover { background: #f9f9f9; color: #212625; border-color: #f9f9f9; }
+
+/* ---------- form panels ---------- */
+.gw-panel {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  overflow-y: auto;
+  padding: 2.6rem 2.9rem 2rem;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  transition: opacity 0.45s ease-in-out, transform 0.45s ease-in-out, visibility 0s linear 0.45s;
+}
+.gw-panel-signin { left: 0; }
+.gw-panel-signup { left: 50%; }
+
+.gw-card[data-mode='signin'] .gw-panel-signin,
+.gw-card[data-mode='forgot'] .gw-panel-signin {
+  opacity: 1; visibility: visible; transform: translateX(0);
+  transition: opacity 0.5s ease-in-out 0.18s, transform 0.5s ease-in-out 0.18s, visibility 0s;
+}
+.gw-card[data-mode='signup'] .gw-panel-signin {
+  opacity: 0; visibility: hidden; transform: translateX(-26px); pointer-events: none;
+}
+.gw-card[data-mode='signup'] .gw-panel-signup {
+  opacity: 1; visibility: visible; transform: translateX(0);
+  transition: opacity 0.5s ease-in-out 0.18s, transform 0.5s ease-in-out 0.18s, visibility 0s;
+}
+.gw-card[data-mode='signin'] .gw-panel-signup,
+.gw-card[data-mode='forgot'] .gw-panel-signup {
+  opacity: 0; visibility: hidden; transform: translateX(26px); pointer-events: none;
+}
+
+.gw-form { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
+.gw-form-grow { flex: 1 0 auto; display: flex; flex-direction: column; gap: 1rem; justify-content: center; }
+.gw-panel-signup .gw-form-grow { justify-content: flex-start; }
+
+.gw-title {
+  font-family: var(--font-display);
+  font-size: 1.65rem; font-weight: 800; letter-spacing: -0.01em;
+  text-align: center; color: var(--gw-ink);
+}
+.gw-subtitle { text-align: center; font-size: 0.85rem; color: var(--gw-muted); margin-top: -0.55rem; }
+
+.gw-label {
+  display: block;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--gw-ink);
+  margin-bottom: 0.4rem;
+}
+.gw-input-wrap { position: relative; }
+.gw-input-icon {
+  position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+  width: 1rem; height: 1rem; color: var(--gw-faint); pointer-events: none;
+}
+.gw-input {
+  width: 100%;
+  padding: 0.72rem 0.9rem 0.72rem 2.55rem;
+  border-radius: 12px;
+  background: var(--gw-input-bg);
+  border: 1px solid transparent;
+  color: var(--gw-input-ink);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.gw-input::placeholder { color: var(--gw-input-placeholder); }
+.gw-input:focus {
+  outline: none;
+  background: var(--gw-input-bg-focus);
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 3px var(--gw-green-ring);
+}
+.gw-input:disabled { opacity: 0.55; }
+select.gw-input { appearance: none; -webkit-appearance: none; padding-right: 2.4rem; cursor: pointer; }
+.gw-select-chevron {
+  position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+  width: 1rem; height: 1rem; color: var(--gw-faint); pointer-events: none;
+}
+.gw-eye-btn {
+  position: absolute; right: 0.7rem; top: 50%; transform: translateY(-50%);
+  color: var(--gw-faint); padding: 0.25rem; cursor: pointer; background: none; border: none;
+}
+.gw-eye-btn:hover { color: var(--gw-ink); }
+.gw-hint { margin-top: 0.4rem; font-size: 0.7rem; color: var(--gw-faint); }
+
+.gw-btn-primary {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.78rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--gw-green);
+  color: #fff;
+  font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 12px 24px -10px rgba(11, 93, 59, 0.55);
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+.gw-btn-primary:hover:not(:disabled) { background: var(--gw-green-hover); transform: translateY(-1px); }
+.gw-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.gw-spinner {
+  width: 1rem; height: 1rem; border-radius: 9999px;
+  border: 2px solid #fff; border-top-color: transparent;
+  animation: gw-spin 0.7s linear infinite;
+}
+@keyframes gw-spin { to { transform: rotate(360deg); } }
+
+.gw-alert {
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.83rem;
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  animation: gw-fade-in 0.3s ease both;
+}
+.gw-alert svg { width: 1rem; height: 1rem; flex-shrink: 0; margin-top: 0.15rem; }
+.gw-alert-error { background: var(--gw-error-bg); border: 1px solid var(--gw-error-border); color: var(--gw-error-ink); }
+.gw-alert-success { background: var(--gw-success-bg); border: 1px solid var(--gw-success-border); color: var(--gw-success-ink); }
+@keyframes gw-fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.gw-check {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  font-size: 0.8rem; color: var(--gw-muted);
+  cursor: pointer; user-select: none;
+}
+.gw-check input { width: 1rem; height: 1rem; margin-top: 0.1rem; border-radius: 4px; accent-color: #0b5d3b; flex-shrink: 0; }
+.gw-check-inline { align-items: center; }
+.gw-check-inline input { margin-top: 0; }
+
+.gw-link {
+  background: none; border: none; padding: 0;
+  font-family: inherit; font-size: 0.78rem; font-weight: 600;
+  color: var(--gw-green); cursor: pointer;
+}
+.gw-link:hover { text-decoration: underline; }
+.gw-switch-line { text-align: center; font-size: 0.8rem; color: var(--gw-muted); }
+.gw-switch-line .gw-link { font-size: 0.8rem; }
+
+.gw-forgot-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+.gw-forgot-row .gw-label { margin-bottom: 0; }
+
+.gw-panel-foot {
+  margin-top: 1.4rem; padding-top: 1.1rem;
+  border-top: 1px solid var(--gw-divider);
+  text-align: center;
+}
+.gw-panel-foot .gw-foot-line {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-size: 0.72rem; color: var(--gw-faint);
+}
+.gw-panel-foot svg { width: 0.85rem; height: 0.85rem; color: var(--gw-green); }
+
+/* ---------- small screens: hero becomes a top banner ---------- */
+@media (max-width: 899px) {
+  .gw-card { height: auto; min-height: 0; display: flex; flex-direction: column; }
+  .gw-hero {
+    position: relative; top: auto; bottom: auto; left: auto;
+    width: auto; margin: 10px 10px 0; height: 168px; flex: none;
+    transform: none !important; transition: none;
+  }
+  .gw-hero-inner { padding: 1.5rem 1.5rem 3.2rem; }
+  .gw-hero-title { font-size: 1.45rem; }
+  .gw-hero-text { margin-bottom: 0.9rem; font-size: 0.85rem; }
+  .gw-hero-brand { top: 0.9rem; left: 1.1rem; }
+  .gw-panel {
+    position: relative; width: 100%; left: auto; top: auto; bottom: auto;
+    overflow: visible; padding: 1.6rem 1.35rem 1.5rem;
+  }
+  .gw-card[data-mode='signin'] .gw-panel-signup,
+  .gw-card[data-mode='forgot'] .gw-panel-signup { display: none; }
+  .gw-card[data-mode='signup'] .gw-panel-signin { display: none; }
+  .gw-panel { transform: none !important; transition: opacity 0.3s ease; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gw-hero, .gw-panel, .gw-hero-content { transition-duration: 0.01s !important; }
+}

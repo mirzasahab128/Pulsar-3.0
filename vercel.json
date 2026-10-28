@@ -1,0 +1,1 @@
+{"$schema":"https://openapi.vercel.sh/vercel.json","rewrites":[{"destination":"https://api.thrivemedrcm.com/api/:path*","source":"/api/:path*"}]}

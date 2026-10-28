@@ -1,0 +1,441 @@
+/* ==========================================================================
+   PULSAR "FIELD & SAGE" THEME — Phase 1 (app shell + dashboard)
+   Founder-approved theme (first build): cream/sage page, deep forest green,
+   white cards at 24px radius, pill segmented controls, red count badges.
+   Tokens live on .pv-shell (the App root) so every module rendered inside
+   the shell inherits them; component classes are prefixed pv-.
+   Dark mode follows the app's existing .dark / [data-theme="dark"] switch.
+   ========================================================================== */
+
+.pv-shell {
+  --pv-bg-1: #F3F5EC;
+  --pv-bg-2: #E9EDE0;
+  --pv-card: #FFFFFF;
+  --pv-card-soft: #F7F9F1;
+  --pv-border: #E3E8D6;
+  --pv-ink: #16241A;
+  --pv-muted: #6C7A6E;
+  --pv-green: #0B5D3B;
+  --pv-accent: #1DA068;
+  --pv-bright: #25B878;
+  --pv-mint: #E2F1E6;
+  --pv-mint-2: #CDE7D4;
+  --pv-amber: #B97F16;
+  --pv-amber-strong: #DE9A2E;
+  --pv-amber-tint: #FBF1DA;
+  --pv-red: #CF4B45;
+  --pv-red-tint: #FAE9E7;
+  --pv-sky: #2E7FA8;
+  --pv-sky-tint: #E2EEF7;
+  --pv-violet: #7C5CBF;
+  --pv-violet-tint: #ECE7F7;
+  --pv-pill-bg: #ECEFE2;
+  --pv-pill-active: #14231A;
+  --pv-on-pill-active: #F7F9F1;
+  --pv-track: #E7EEE0;
+  --pv-shadow: 0 12px 32px rgba(31, 54, 32, 0.07);
+  --pv-shadow-lg: 0 18px 44px rgba(31, 54, 32, 0.12);
+  --pv-kpi-shadow-crit: 0 14px 34px rgba(207, 75, 69, 0.16);
+  background: linear-gradient(160deg, var(--pv-bg-1), var(--pv-bg-2));
+  background-attachment: fixed;
+}
+
+.dark .pv-shell,
+[data-theme="dark"] .pv-shell {
+  --pv-bg-1: #0A100C;
+  --pv-bg-2: #0C130D;
+  --pv-card: #121B14;
+  --pv-card-soft: #18241B;
+  --pv-border: #223028;
+  --pv-ink: #EAF3EC;
+  --pv-muted: #93A696;
+  --pv-green: #1DA068;
+  --pv-accent: #25B878;
+  --pv-bright: #35CC8A;
+  --pv-mint: #1B2E21;
+  --pv-mint-2: #24402E;
+  --pv-amber: #E5AC45;
+  --pv-amber-strong: #E5AC45;
+  --pv-amber-tint: #33290F;
+  --pv-red: #E0685F;
+  --pv-red-tint: #38201D;
+  --pv-sky: #5FB3D9;
+  --pv-sky-tint: #16303F;
+  --pv-violet: #B79CED;
+  --pv-violet-tint: #2A2140;
+  --pv-pill-bg: #182419;
+  --pv-pill-active: #EAF3EC;
+  --pv-on-pill-active: #14231A;
+  --pv-track: #1E2C21;
+  --pv-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  --pv-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --pv-kpi-shadow-crit: 0 14px 34px rgba(224, 104, 95, 0.18);
+}
+
+/* ---------- Surfaces ---------- */
+
+.pv-card {
+  background: var(--pv-card);
+  border: 1px solid var(--pv-border);
+  border-radius: 24px;
+  box-shadow: var(--pv-shadow);
+  color: var(--pv-ink);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.pv-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--pv-shadow-lg);
+}
+.pv-panel {
+  background: var(--pv-card);
+  border: 1px solid var(--pv-border);
+  border-radius: 24px;
+  box-shadow: var(--pv-shadow);
+  color: var(--pv-ink);
+}
+.pv-soft {
+  background: var(--pv-card-soft);
+  border: 1px solid var(--pv-border);
+  border-radius: 16px;
+}
+
+/* ---------- Pill segmented controls & tabs ---------- */
+
+.pv-seg {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--pv-pill-bg);
+  border-radius: 999px;
+  padding: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pv-seg::-webkit-scrollbar { display: none; }
+.pv-seg button {
+  border: none;
+  background: transparent;
+  color: var(--pv-muted);
+  font: 700 12px 'Plus Jakarta Sans', system-ui, sans-serif;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pv-seg button:hover { color: var(--pv-ink); }
+.pv-seg button.active {
+  background: var(--pv-card);
+  color: var(--pv-ink);
+  box-shadow: 0 4px 12px rgba(31, 54, 32, 0.14);
+}
+
+.pv-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--pv-pill-bg);
+  border-radius: 999px;
+  padding: 5px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pv-tabs::-webkit-scrollbar { display: none; }
+.pv-tabs button {
+  border: none;
+  background: transparent;
+  color: var(--pv-muted);
+  font: 700 13px 'Plus Jakarta Sans', system-ui, sans-serif;
+  padding: 9px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.pv-tabs button:hover { color: var(--pv-ink); }
+.pv-tabs button.active {
+  background: var(--pv-pill-active);
+  color: var(--pv-on-pill-active);
+  box-shadow: 0 8px 20px rgba(20, 35, 26, 0.22);
+}
+
+/* ---------- Chips, deltas, badges ---------- */
+
+.pv-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.pv-tint-green { background: var(--pv-mint); color: var(--pv-green); }
+.pv-tint-amber { background: var(--pv-amber-tint); color: var(--pv-amber); }
+.pv-tint-red { background: var(--pv-red-tint); color: var(--pv-red); }
+.pv-tint-sky { background: var(--pv-sky-tint); color: var(--pv-sky); }
+.pv-tint-violet { background: var(--pv-violet-tint); color: var(--pv-violet); }
+
+.pv-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  line-height: 1.35;
+}
+.pv-delta.up { background: var(--pv-mint); color: var(--pv-green); }
+.pv-delta.down { background: var(--pv-red-tint); color: var(--pv-red); }
+.pv-delta.flat { background: var(--pv-pill-bg); color: var(--pv-muted); }
+.pv-delta.warn { background: var(--pv-amber-tint); color: var(--pv-amber); }
+
+.pv-count {
+  background: var(--pv-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pv-count.on-rail {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  border: 2px solid var(--pv-card);
+  z-index: 2;
+}
+
+/* ---------- Floating rail (sidebar) ---------- */
+
+.pv-rail {
+  background: var(--pv-card);
+  border: 1px solid var(--pv-border);
+  box-shadow: var(--pv-shadow);
+  color: var(--pv-ink);
+}
+@media (min-width: 1024px) {
+  .pv-rail { border-radius: 28px; }
+}
+
+.pv-group-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pv-muted);
+}
+
+.pv-nav-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--pv-ink);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+}
+.pv-nav-btn:hover { background: var(--pv-mint); }
+.pv-nav-btn.active {
+  background: var(--pv-green);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(11, 93, 59, 0.28);
+}
+.pv-nav-btn.active:hover { background: var(--pv-green); }
+.pv-nav-btn.locked { color: var(--pv-muted); }
+.pv-rail.is-collapsed .pv-nav-btn {
+  justify-content: center;
+  padding: 11px 0;
+  border-radius: 15px;
+}
+
+/* ---------- KPI grid + expand-in-place ---------- */
+
+.pv-kpi-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.pv-kpi {
+  flex: 1 1 208px;
+  min-width: 0;
+  cursor: pointer;
+  transition:
+    flex-basis 0.55s cubic-bezier(0.3, 1.25, 0.35, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+.pv-kpi:hover { transform: translateY(-3px); box-shadow: var(--pv-shadow-lg); }
+.pv-kpi.expanded {
+  flex: 1 1 100%;
+  cursor: default;
+}
+.pv-kpi.expanded:hover { transform: none; }
+.pv-kpi.warn { border-color: var(--pv-amber-strong); }
+.pv-kpi.crit { border-color: var(--pv-red); box-shadow: var(--pv-kpi-shadow-crit); }
+
+.pv-kpi-detail {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition:
+    max-height 0.55s cubic-bezier(0.3, 1.15, 0.35, 1),
+    opacity 0.35s ease 0.08s,
+    margin-top 0.45s ease;
+}
+.pv-kpi.expanded .pv-kpi-detail {
+  max-height: 520px;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+.pv-statbox {
+  background: var(--pv-card-soft);
+  border: 1px solid var(--pv-border);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.pv-statbox .pv-statbox-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pv-muted);
+}
+.pv-statbox .pv-statbox-value {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--pv-ink);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* Range track (progress bars) */
+.pv-track {
+  height: 9px;
+  border-radius: 99px;
+  background: var(--pv-track);
+  overflow: hidden;
+}
+.pv-track > div {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--pv-accent), var(--pv-bright));
+  transition: width 0.8s cubic-bezier(0.3, 1.2, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-kpi,
+  .pv-kpi-detail,
+  .pv-card,
+  .pv-track > div {
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   PHASE 2 — whole-site bridge (founder: no screen may look like a separate
+   app). Module interiors share the legacy glass surface classes; inside
+   .pv-shell those surfaces now resolve to the theme card instead of the
+   old blue/slate glass, so every module inherits the same card language
+   without touching its logic. Explicit per-file text/button retints (the
+   dark-only workspaces) live in the components themselves — a white
+   surface with legacy white text would be unreadable, so those files were
+   converted, not just bridged. Higher specificity than the base glass
+   classes; the pv vars flip with the existing .dark switch, so dark mode
+   keeps its deep-ink cards.
+   ========================================================================== */
+.pv-shell .glass-standard,
+.pv-shell .glass-elevated,
+.pv-shell .glass-base,
+.pv-shell .glass-floating,
+.pv-shell .glass-panel,
+.pv-shell .glass-card {
+  background-color: var(--pv-card);
+  border-color: var(--pv-border);
+  box-shadow: var(--pv-shadow);
+}
+.pv-shell .glass-standard,
+.pv-shell .glass-elevated,
+.pv-shell .glass-panel,
+.pv-shell .glass-card {
+  border-radius: 24px;
+}
+
+/* ==========================================================================
+   PHASE 2 — LiquidGlassDashboard interior, scoped retint. The --lg-*
+   tokens are shared with AuthGate/Header, so they are NOT changed
+   globally: only the subtree under .pv-lg (the dashboard view wrapper in
+   App.tsx) re-maps them to theme tokens. AuthGate and Header keep the
+   original glass tokens.
+   ========================================================================== */
+.pv-shell .pv-lg {
+  --lg-emerald: #0B5D3B;
+  --lg-emerald-glow: rgba(11, 93, 59, 0.22);
+  --lg-aqua: #2E7FA8;
+  --lg-aqua-glow: rgba(46, 127, 168, 0.20);
+  --lg-gold: #B97F16;
+  --lg-gold-glow: rgba(185, 127, 22, 0.20);
+  --lg-coral: #CF4B45;
+  --lg-coral-glow: rgba(207, 75, 69, 0.20);
+  --lg-violet: #7C5CBF;
+  --lg-violet-glow: rgba(124, 92, 191, 0.20);
+  --lg-bg-base: transparent;
+  --lg-bg-surface: #F7F9F1;
+  --lg-bg-card: #FFFFFF;
+  --lg-bg-elevated: #F7F9F1;
+  --lg-border-glass: #E3E8D6;
+  --lg-border-glass-bright: #CDE7D4;
+  --lg-text-primary: #16241A;
+  --lg-text-secondary: #6C7A6E;
+  --lg-text-muted: #8A968C;
+  --lg-shadow-glass: 0 12px 32px rgba(31, 54, 32, 0.07);
+}
+.dark .pv-shell .pv-lg,
+[data-theme="dark"] .pv-shell .pv-lg {
+  --lg-emerald: #1DA068;
+  --lg-emerald-glow: rgba(29, 160, 104, 0.25);
+  --lg-aqua: #4E9CC4;
+  --lg-aqua-glow: rgba(78, 156, 196, 0.22);
+  --lg-gold: #E5AC45;
+  --lg-gold-glow: rgba(229, 172, 69, 0.22);
+  --lg-coral: #E0685F;
+  --lg-coral-glow: rgba(224, 104, 95, 0.22);
+  --lg-violet: #9B85D6;
+  --lg-violet-glow: rgba(155, 133, 214, 0.22);
+  --lg-bg-base: transparent;
+  --lg-bg-surface: #18241B;
+  --lg-bg-card: #121B14;
+  --lg-bg-elevated: #18241B;
+  --lg-border-glass: #223028;
+  --lg-border-glass-bright: #2E4A38;
+  --lg-text-primary: #EAF3EC;
+  --lg-text-secondary: #93A696;
+  --lg-text-muted: #6E8371;
+  --lg-shadow-glass: 0 12px 32px rgba(0, 0, 0, 0.35);
+}

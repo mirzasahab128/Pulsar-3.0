@@ -1,0 +1,6 @@
+{
+  "name": "Pulsar - Autonomous Medical Billing Sales & Calling Bot",
+  "description": "Autonomous AI agent for US medical billing sales: scrubs provider leads, LinkedIn prospecting, ultra-realistic voice cold calling, instant live warm transfer to manager, AI meeting notes, and 4 PM PST daily progress briefing.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

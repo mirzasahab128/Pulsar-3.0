@@ -1,0 +1,12 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Phase 0: persisted server state + throwaway test keys
+server-data/
+tests/test-keys.json

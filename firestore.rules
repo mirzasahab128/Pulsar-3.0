@@ -1,0 +1,181 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Phase 0 (C7): owner identity is configuration, never hardcoded emails.
+    // Master admins are the addresses listed in the Firestore document
+    // platformConfig/masterAdmins (field: emails, an array of strings),
+    // provisioned via the Firebase console / Admin SDK. Writes to that
+    // document are denied by these rules (the catch-all denies it); get()
+    // reads inside rule functions are not subject to the document's own
+    // rules, so this lookup works while the document itself stays locked.
+    function isOwner() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        exists(/databases/$(database)/documents/platformConfig/masterAdmins) &&
+        request.auth.token.email in get(/databases/$(database)/documents/platformConfig/masterAdmins).data.emails;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        isOwner() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function getUserWorkspace() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.workspaceId;
+    }
+
+    function isUserReadOnly() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isReadOnly == true;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Health check collection for boot connection verification
+    // Phase 0 (M1): was `allow read: if true` (public). Signed-in only now.
+    match /test/{docId} {
+      allow read: if isSignedIn();
+    }
+    
+    // User profile matching uid: read allowed for authenticated users.
+    // Tenant isolation: Owner can write any profile.
+    // Customers can only create/update their own profile AND cannot self-assign role 'admin' or arbitrary workspaces.
+    match /users/{userId} {
+      // Phase 0 (M1): was readable by ANY signed-in user (every profile,
+      // including emails/roles/workspaceIds). Self or admin only.
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if isSignedIn() && (
+        isOwner() || 
+        (
+          request.auth.uid == userId &&
+          request.resource.data.role == 'customer' &&
+          request.resource.data.isReadOnly == true &&
+          request.resource.data.workspaceId == ('ws_' + request.auth.uid)
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Phases 1–3 (§3g): platform collections are server-managed. Clients may
+    // read their own users/{uid} doc only (above); NO client reads or writes
+    // plans, platformConfig, or adminAudit — all access goes through the
+    // Express server's /api/admin/* endpoints. (The isOwner() function's
+    // internal get() of platformConfig/masterAdmins is a rules-engine read
+    // and is not governed by these document rules.)
+    match /plans/{planId} {
+      allow read, write: if false;
+    }
+
+    match /platformConfig/{docId} {
+      allow read, write: if false;
+    }
+
+    match /adminAudit/{auditId} {
+      allow read, write: if false;
+    }
+
+    // Workspaces: Accessible strictly by tenant members or admin
+    match /workspaces/{workspaceId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserWorkspace() == workspaceId)
+      );
+      allow create, update: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserWorkspace() == workspaceId)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Medical & Business Leads: Strictly tenant-isolated by workspaceId
+    match /leads/{leadId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && resource.data.workspaceId == getUserWorkspace())
+      );
+      allow create: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         request.resource.data.workspaceId == getUserWorkspace())
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         resource.data.workspaceId == getUserWorkspace())
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Meeting notes & transcripts: Strictly tenant-isolated by workspaceId
+    match /meeting_notes/{noteId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && resource.data.workspaceId == getUserWorkspace())
+      );
+      allow create: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         request.resource.data.workspaceId == getUserWorkspace())
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         resource.data.workspaceId == getUserWorkspace())
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Daily Stats snapshots: Scoped by workspaceId
+    match /daily_stats/{statsId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && resource.data.workspaceId == getUserWorkspace())
+      );
+      allow create, update: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         request.resource.data.workspaceId == getUserWorkspace())
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Suppression / Do-Not-Contact lists: Scoped by workspaceId
+    match /suppression_lists/{suppressionId} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && resource.data.workspaceId == getUserWorkspace())
+      );
+      allow create, update: if isSignedIn() && (
+        isAdmin() || 
+        (!isUserReadOnly() && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         request.resource.data.workspaceId == getUserWorkspace())
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Chat sessions scoped by userId
+    match /chat_sessions/{sessionId} {
+      // Phase 0 (M1): was readable by ANY signed-in user. A session is
+      // readable only by its owner (resource.data.userId) or an admin.
+      // List queries must therefore filter by userId == caller's uid.
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create, update, delete: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+    }
+  }
+}

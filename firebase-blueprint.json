@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "UserProfile": {
+      "collection": "users",
+      "fields": {
+        "uid": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "customer", "manager", "agent"] },
+        "isReadOnly": { "type": "boolean" },
+        "workspaceId": { "type": "string", "required": true },
+        "organizationName": { "type": "string" },
+        "niche": { "type": "string" },
+        "nicheTemplateId": { "type": "string" },
+        "permissions": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "lastLoginAt": { "type": "string" }
+      }
+    },
+    "Workspace": {
+      "collection": "workspaces",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "workspaceId": { "type": "string", "required": true },
+        "name": { "type": "string", "required": true },
+        "industry": { "type": "string" },
+        "niche": { "type": "string" },
+        "nicheTemplateId": { "type": "string" },
+        "agentConfig": { "type": "object" },
+        "targetPersona": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "RCMLead": {
+      "collection": "leads",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "workspaceId": { "type": "string", "required": true },
+        "userId": { "type": "string", "required": true },
+        "practiceName": { "type": "string", "required": true },
+        "doctorName": { "type": "string" },
+        "title": { "type": "string" },
+        "specialty": { "type": "string" },
+        "practiceSize": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "state": { "type": "string" },
+        "ehrSystem": { "type": "string" },
+        "monthlyClaimVolume": { "type": "string" },
+        "painPoints": { "type": "array" },
+        "tags": { "type": "array" },
+        "status": { "type": "string" },
+        "source": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "MeetingNote": {
+      "collection": "meeting_notes",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "workspaceId": { "type": "string", "required": true },
+        "userId": { "type": "string", "required": true },
+        "practiceName": { "type": "string", "required": true },
+        "doctorName": { "type": "string" },
+        "date": { "type": "string" },
+        "duration": { "type": "string" },
+        "qualificationStatus": { "type": "string" },
+        "executiveSummary": { "type": "string" },
+        "actionItems": { "type": "array" },
+        "transcript": { "type": "array" },
+        "crmSyncStatus": { "type": "string" },
+        "crmSyncTimestamp": { "type": "string" }
+      }
+    },
+    "ChatSession": {
+      "collection": "chat_sessions",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "workspaceId": { "type": "string" },
+        "userId": { "type": "string", "required": true },
+        "role": { "type": "string" },
+        "messages": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      }
+    }
+  }
+}

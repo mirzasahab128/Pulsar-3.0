@@ -40,6 +40,7 @@ import { Header } from './components/Header';
 import { SpatialSidebar } from './components/SpatialSidebar';
 import { AdminCommandCenter } from './components/AdminCommandCenter';
 import { ConsentGatesPage, AfterCallPage, OwnerDashboardPage } from './components/Phase7Pages';
+import { BillingPage } from './components/BillingPage';
 import { AdminUnavailablePanel } from './components/AdminUnavailablePanel';
 import { PipelineWorkspace } from './components/PipelineWorkspace';
 import { SpatialCommandBar } from './components/SpatialCommandBar';
@@ -1056,6 +1057,20 @@ export default function App() {
         {activeModule === 'owner_dashboard' && (
           access?.isMasterAdmin ? (
             <OwnerDashboardPage />
+          ) : (
+            <AdminUnavailablePanel
+              serverReachable={access !== null}
+              signedInEmail={currentUser?.email ?? profile?.email ?? null}
+            />
+          )
+        )}
+
+        {/* Billing, test mode only: same master-admin gate as the Phase 7
+            pages. Non-masters get the honest unavailable panel, never the
+            real billing page. Nothing here charges a card. */}
+        {activeModule === 'billing' && (
+          access?.isMasterAdmin ? (
+            <BillingPage />
           ) : (
             <AdminUnavailablePanel
               serverReachable={access !== null}

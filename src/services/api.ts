@@ -775,6 +775,64 @@ All ${params.stats.warmTransfersBridged} connected calls were immediately bridge
     return data;
   },
 
+  /** Billing, TEST MODE ONLY. No route here charges a card or stores
+   *  card details. The test checkout session is a fake id, never a charge. */
+  async getBillingOverview(): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/overview', { headers });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load billing');
+    return data;
+  },
+
+  async startBillingTrial(payload: { workspaceId: string; planId: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/trial', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to start trial');
+    return data;
+  },
+
+  async selectBillingPlan(payload: { workspaceId: string; planId: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/select-plan', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to change plan');
+    return data;
+  },
+
+  async renewBilling(payload: { workspaceId: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/renew', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to renew billing');
+    return data;
+  },
+
+  async cancelBilling(payload: { workspaceId: string; stopFollowUpsOnCancel: boolean }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/cancel', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to cancel billing');
+    return data;
+  },
+
+  async recordBillingManualPayment(payload: { workspaceId: string; amountCents: number; paidAt?: string; note?: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/manual-payment', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to record manual payment');
+    return data;
+  },
+
+  async createBillingTestCheckout(payload: { workspaceId: string; planId: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/billing/test-checkout', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to create test checkout');
+    return data;
+  },
+
   /** Set per-user feature overrides: true = grant, false = revoke,
    *  null = clear (fall back to the plan). Returns the updated record. */
   async setUserFeatureOverrides(uid: string, overrides: Record<string, boolean | null>): Promise<PlatformUserRecord> {

@@ -333,6 +333,7 @@ export type PulsarSpatialModule =
   | 'consent_gates'
   | 'after_call'
   | 'owner_dashboard'
+  | 'billing'
   | 'permissions'
   | 'workspaces'
   | 'settings';

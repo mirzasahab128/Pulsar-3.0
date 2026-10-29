@@ -31,6 +31,7 @@ import { OWNER_EMAILS, DecodedFirebaseToken } from './security.js';
 import type { ConsentRecord, SuppressionRecord } from './contactGate.js';
 import type { DraftMessage, FollowUpTask, OwnerSummary, PipelineStage } from './afterCall.js';
 import type { OwnerAction } from './ownerDashboard.js';
+import type { BillingSubscription } from './billing.js';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -205,6 +206,12 @@ export interface Phase74State {
   actions: OwnerAction[];
 }
 
+/** Billing: one subscription per workspace. Test mode only. No card
+ *  details are stored anywhere in this state. */
+export interface BillingState {
+  subscriptions: Record<string, BillingSubscription>;
+}
+
 export interface PlatformState {
   users: Record<string, PlatformUser>;
   plans: Record<string, Plan>;
@@ -216,6 +223,7 @@ export interface PlatformState {
   phase71: Phase71State;
   phase73: Phase73State;
   phase74: Phase74State;
+  billing: BillingState;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,7 +276,8 @@ export function emptyPlatformState(): PlatformState {
     deletedUsers: [],
     phase71: { consents: [], suppressions: [] },
     phase73: { pipeline: {}, tasks: [], drafts: [], ownerSummaries: [] },
-    phase74: { actions: [] }
+    phase74: { actions: [] },
+    billing: { subscriptions: {} }
   };
 }
 
@@ -299,6 +308,10 @@ export function getPlatformState(): PlatformState {
   // Migration: states persisted before Phase 7.4 have no owner action log.
   if (!state.phase74 || !Array.isArray(state.phase74.actions)) {
     state.phase74 = { actions: [] };
+  }
+  // Migration: states persisted before billing have no billing state.
+  if (!state.billing || typeof state.billing.subscriptions !== 'object') {
+    state.billing = { subscriptions: {} };
   }
   return state;
 }

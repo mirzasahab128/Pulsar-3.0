@@ -90,6 +90,24 @@ import {
   snoozeFollowUp,
   unsnoozeFollowUp
 } from './server/ownerDashboard.js';
+import {
+  BILLING_PLANS,
+  canAddLead,
+  cancelSubscription,
+  createTestCheckoutSession,
+  expireTrialIfDue,
+  formatPriceCents,
+  getBillingPlan,
+  getBillingProviderConfig,
+  leadsRemaining,
+  recordLeadUse,
+  recordManualPayment,
+  renewPeriod,
+  selectPlan,
+  startTrial,
+  trialDaysRemaining,
+  type BillingPlanId
+} from './server/billing.js';
 import crypto from 'crypto';
 import { 
   sendEmailViaResend, 
@@ -2489,6 +2507,139 @@ app.post('/api/admin/phase74/next-step', requireMasterAdmin, ah(async (req, res)
   writeAudit(state, actorOf(req).email, 'phase74.next_step', contactId, `next_step=${result.action.newNextAction}`);
   persistPlatform();
   return res.json({ success: true, confirmed: true, action: result.action });
+}));
+
+// --- Billing: checkout and billing, TEST MODE ONLY ------------------------
+// Master-admin only. Nothing here charges a card, stores a card number,
+// or calls a payment provider. The provider config returns only variable
+// names and a configured flag, never a key value. A live checkout flow,
+// webhook handling, and a live test payment are still required before
+// any customer can pay.
+app.get('/api/admin/billing/overview', requireMasterAdmin, ah(async (_req, res) => {
+  const state = getPlatformState();
+  const now = new Date();
+  const subscriptions = Object.values(state.billing.subscriptions).map((sub) => {
+    const plan = getBillingPlan(sub.planId);
+    return {
+      ...expireTrialIfDue(sub, now),
+      planName: plan ? plan.name : sub.planId,
+      priceCentsPerMonth: plan ? plan.priceCentsPerMonth : 0,
+      leadsRemaining: leadsRemaining(sub),
+      trialDaysRemaining: trialDaysRemaining(sub, now),
+    };
+  });
+  return res.json({
+    success: true,
+    testMode: true,
+    liveCharging: false,
+    plans: BILLING_PLANS.map((plan) => ({ ...plan, price: formatPriceCents(plan.priceCentsPerMonth) })),
+    provider: getBillingProviderConfig(),
+    subscriptions,
+  });
+}));
+
+app.post('/api/admin/billing/trial', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string', planId: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const planId = String(req.body.planId || '').trim() as BillingPlanId;
+  if (!workspaceId) return badRequest(res, 'WORKSPACE_ID_REQUIRED');
+  if (!getBillingPlan(planId)) return badRequest(res, 'UNKNOWN_PLAN');
+  const state = getPlatformState();
+  const sub = startTrial(workspaceId, planId);
+  state.billing.subscriptions[workspaceId] = sub;
+  writeAudit(state, actorOf(req).email, 'billing.trial_started', workspaceId, `trial plan=${planId} 14 days, test mode, no charge`);
+  persistPlatform();
+  return res.status(201).json({ success: true, subscription: sub, trialDaysRemaining: trialDaysRemaining(sub) });
+}));
+
+app.post('/api/admin/billing/select-plan', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string', planId: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const planId = String(req.body.planId || '').trim() as BillingPlanId;
+  const state = getPlatformState();
+  const sub = state.billing.subscriptions[workspaceId];
+  if (!sub) return badRequest(res, 'SUBSCRIPTION_NOT_FOUND');
+  const result = selectPlan(sub, planId);
+  if (!result.ok) return badRequest(res, result.error || 'PLAN_CHANGE_FAILED');
+  state.billing.subscriptions[workspaceId] = result.subscription;
+  writeAudit(state, actorOf(req).email, 'billing.plan_selected', workspaceId, `plan=${planId} pending=${result.subscription.pendingPlanId || 'none'}`);
+  persistPlatform();
+  return res.json({ success: true, subscription: result.subscription });
+}));
+
+app.post('/api/admin/billing/renew', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const state = getPlatformState();
+  const sub = state.billing.subscriptions[workspaceId];
+  if (!sub) return badRequest(res, 'SUBSCRIPTION_NOT_FOUND');
+  const expired = expireTrialIfDue(sub, new Date());
+  const renewed = expired.status === 'trial_expired' ? expired : renewPeriod(expired, new Date());
+  state.billing.subscriptions[workspaceId] = renewed;
+  writeAudit(state, actorOf(req).email, 'billing.renewed', workspaceId, `status=${renewed.status} plan=${renewed.planId}`);
+  persistPlatform();
+  return res.json({ success: true, subscription: renewed });
+}));
+
+app.post('/api/admin/billing/cancel', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string', stopFollowUpsOnCancel: 'boolean' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const state = getPlatformState();
+  const sub = state.billing.subscriptions[workspaceId];
+  if (!sub) return badRequest(res, 'SUBSCRIPTION_NOT_FOUND');
+  const cancelled = cancelSubscription(sub, { stopFollowUpsOnCancel: req.body.stopFollowUpsOnCancel === true });
+  state.billing.subscriptions[workspaceId] = cancelled;
+  writeAudit(state, actorOf(req).email, 'billing.cancelled', workspaceId, `cancel_at_period_end=true stop_follow_ups=${cancelled.stopFollowUpsOnCancel}`);
+  persistPlatform();
+  return res.json({ success: true, subscription: cancelled });
+}));
+
+app.post('/api/admin/billing/manual-payment', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string', amountCents: 'number', note: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const state = getPlatformState();
+  const sub = state.billing.subscriptions[workspaceId];
+  if (!sub) return badRequest(res, 'SUBSCRIPTION_NOT_FOUND');
+  const result = recordManualPayment(sub, {
+    amountCents: req.body.amountCents,
+    paidAt: String(req.body.paidAt || new Date().toISOString()),
+    recordedBy: actorOf(req).email,
+    note: String(req.body.note || ''),
+  });
+  if (!result.ok) return badRequest(res, result.error || 'MANUAL_PAYMENT_FAILED');
+  state.billing.subscriptions[workspaceId] = result.subscription;
+  writeAudit(state, actorOf(req).email, 'billing.manual_payment', workspaceId, `manual payment amount_cents=${req.body.amountCents} plan=${sub.planId} note=${String(req.body.note || '')}`);
+  persistPlatform();
+  return res.json({ success: true, subscription: result.subscription });
+}));
+
+app.post('/api/admin/billing/lead-use', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const state = getPlatformState();
+  const sub = state.billing.subscriptions[workspaceId];
+  if (!sub) return badRequest(res, 'SUBSCRIPTION_NOT_FOUND');
+  const result = recordLeadUse(sub, new Date());
+  if (!result.ok) return badRequest(res, result.error || 'LEAD_CAP_OR_ACCESS');
+  state.billing.subscriptions[workspaceId] = result.subscription;
+  persistPlatform();
+  return res.json({ success: true, subscription: result.subscription, leadsRemaining: leadsRemaining(result.subscription), canAddLead: canAddLead(result.subscription) });
+}));
+
+app.post('/api/admin/billing/test-checkout', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { workspaceId: 'string', planId: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const workspaceId = String(req.body.workspaceId || '').trim();
+  const planId = String(req.body.planId || '').trim() as BillingPlanId;
+  if (!workspaceId) return badRequest(res, 'WORKSPACE_ID_REQUIRED');
+  if (!getBillingPlan(planId)) return badRequest(res, 'UNKNOWN_PLAN');
+  return res.json({ success: true, testMode: true, charged: false, session: createTestCheckoutSession(workspaceId, planId) });
 }));
 
 // --- Dashboard: snapshot sync + stats (prompt Part 2) --------------------------

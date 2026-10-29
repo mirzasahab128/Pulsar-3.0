@@ -28,6 +28,7 @@ import {
   Lock, 
   Layers,
   Settings,
+  CreditCard,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -159,6 +160,7 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
       label: 'Administration',
       items: [
         { id: 'owner_dashboard', label: 'Owner dashboard', icon: Users, isNew: true },
+        { id: 'billing', label: 'Billing', icon: CreditCard, isNew: true },
         { id: 'integrations', label: 'Integrations Matrix', icon: Network },
         { id: 'permissions', label: 'Team & Permissions', icon: Lock },
         { id: 'workspaces', label: 'Customer Workspaces', icon: Layers },

@@ -307,7 +307,7 @@ export const PipelineWorkspace: React.FC = () => {
               The registry only accepts records with provenance. Demo/simulated records are refused, duplicates are
               detected on NPI / phone / name+address, and suppressions are enforced at ingest.
             </p>
-            <div className="grid sm:grid-cols-5 gap-2 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-3">
               <input className={input} placeholder="City" value={npiForm.city} onChange={e => setNpiForm({ ...npiForm, city: e.target.value })} />
               <input className={input} placeholder="State (TX)" value={npiForm.state} onChange={e => setNpiForm({ ...npiForm, state: e.target.value })} />
               <input className={input} placeholder="Taxonomy (Cardiology)" value={npiForm.taxonomy} onChange={e => setNpiForm({ ...npiForm, taxonomy: e.target.value })} />
@@ -383,7 +383,7 @@ export const PipelineWorkspace: React.FC = () => {
               Checked at ingest, at enrollment, and again before every send. Bounces and complaints are added
               automatically by the Resend webhook. Removing an entry is a master-admin action.
             </p>
-            <div className="grid sm:grid-cols-4 gap-2 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-3">
               <select className={input} value={supForm.identifierType} onChange={e => setSupForm({ ...supForm, identifierType: e.target.value })}>
                 <option value="email">Email</option><option value="phone">Phone</option>
                 <option value="npi">NPI</option><option value="practice">Practice name</option>
@@ -418,7 +418,7 @@ export const PipelineWorkspace: React.FC = () => {
           {dailyStats && (
             <div className={card}>
               <h3 className="font-bold mb-2">Today, counted from records ({dailyStats.date})</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-sm">
                 {Object.entries(dailyStats.counts).map(([k, v]) => (
                   <div key={k}>
                     <div className="text-xl font-extrabold">{v}</div>
@@ -510,7 +510,7 @@ export const PipelineWorkspace: React.FC = () => {
             </p>
             <input className={`${input} mb-2`} placeholder="Sequence name" value={seqName} onChange={e => setSeqName(e.target.value)} />
             {seqSteps.map((s, i) => (
-              <div key={i} className="grid sm:grid-cols-6 gap-2 mb-2">
+              <div key={i} className="grid grid-cols-1 sm:grid-cols-6 gap-2 mb-2">
                 <input className={`${input} sm:col-span-2`} placeholder={`Step ${i + 1} subject`} value={s.subject}
                   onChange={e => setSeqSteps(seqSteps.map((x, j) => j === i ? { ...x, subject: e.target.value } : x))} />
                 <input className={`${input} sm:col-span-3`} placeholder="Body" value={s.body}

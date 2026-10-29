@@ -238,7 +238,7 @@ export const LeadStatusPieChart: React.FC<LeadStatusPieChartProps> = ({
         <div className="lg:col-span-7 space-y-3">
           
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="p-3 rounded-xl bg-[var(--pv-card-soft)] border border-blue-500/20">
               <div className="flex items-center gap-1.5 text-[var(--pv-muted)] text-xs">
                 <ShieldCheck className="w-3.5 h-3.5 text-[var(--pv-sky)]" />

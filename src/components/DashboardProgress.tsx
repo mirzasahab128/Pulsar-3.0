@@ -642,7 +642,7 @@ export const DashboardProgress: React.FC<DashboardProgressProps> = ({ leads, tas
 
             <div className="pv-panel p-5 lg:col-span-2">
               <div className="text-[13px] font-bold mb-2">Follow-up Health</div>
-              <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--pv-muted)]">Due today</div>
                   <div className="text-xl font-extrabold tabular-nums">{stats.followUpHealth.dueToday}</div>

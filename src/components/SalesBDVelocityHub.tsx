@@ -619,7 +619,7 @@ export const SalesBDVelocityHub: React.FC<SalesBDVelocityHubProps> = ({
               </div>
 
               {/* Working Capital & Acceleration Summary */}
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
                 <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
                   <span className="text-slate-400 block">Reimbursement Velocity:</span>
                   <strong className="text-blue-400 font-bold">{arDaysSaved} Days Faster</strong>

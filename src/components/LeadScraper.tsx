@@ -1146,7 +1146,7 @@ export const LeadScraper: React.FC<LeadScraperProps> = ({
             </div>
 
             {/* 4-Phase Visual Progression Stepper */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] font-mono">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-[11px] font-mono">
               <div className={`p-2 rounded-xl border flex items-center gap-2 transition ${
                 continuousStatus === 'Queued'
                   ? 'bg-blue-500/20 border-blue-500/50 text-blue-300 font-bold ring-1 ring-blue-400/50'
@@ -1966,7 +1966,7 @@ export const LeadScraper: React.FC<LeadScraperProps> = ({
               </div>
 
               {/* Stepper items */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
                 {[
                   { status: 'Ready for Call', label: '1. Ready' },
                   { status: 'Calling', label: '2. Calling' },
@@ -2089,7 +2089,7 @@ export const LeadScraper: React.FC<LeadScraperProps> = ({
               </div>
             </div>
 
-            <div className={`grid grid-cols-2 gap-3 text-xs p-4 rounded-2xl border ${
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs p-4 rounded-2xl border ${
               isDark ? 'bg-slate-950/70 border-white/10' : 'bg-slate-50 border-slate-200'
             }`}>
               <div>

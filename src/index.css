@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "./styles/liquid-glass.css";
 @import "./styles/theme-vessa.css";
+@import "./styles/responsive-3.0.css";
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 @variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));

@@ -2088,7 +2088,7 @@ export const CallStudio: React.FC<CallStudioProps> = ({
                     <span className={`text-[11px] font-bold uppercase tracking-wider block mb-1.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                       Quick Date & Time Presets (PST):
                     </span>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       <button
                         type="button"
                         onClick={() => handleApplyPreset(1, '10:00')}
@@ -2336,7 +2336,7 @@ export const CallStudio: React.FC<CallStudioProps> = ({
               </div>
 
               {/* Audio & Session Details */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className={`p-3.5 rounded-2xl border space-y-1 ${
                   isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-slate-50 border-slate-200'
                 }`}>

@@ -39,6 +39,7 @@ import {
 import { Header } from './components/Header';
 import { SpatialSidebar } from './components/SpatialSidebar';
 import { AdminCommandCenter } from './components/AdminCommandCenter';
+import { ConsentGatesPage, AfterCallPage, OwnerDashboardPage } from './components/Phase7Pages';
 import { AdminUnavailablePanel } from './components/AdminUnavailablePanel';
 import { PipelineWorkspace } from './components/PipelineWorkspace';
 import { SpatialCommandBar } from './components/SpatialCommandBar';
@@ -1027,17 +1028,34 @@ export default function App() {
           )
         )}
 
-        {/* Visible 3.0 sidebar items only: these open the existing Admin
-            Command Center Outreach Gates tab, scrolled to the matching
-            Phase 7 section. No new screen, no restyle, and the same
-            master-admin gate as Admin Command Center itself. Non-masters
-            get the same honest unavailable panel, never the real center. */}
-        {(activeModule === 'consent_gates' || activeModule === 'after_call' || activeModule === 'owner_dashboard') && (
+        {/* Separate 3.0 pages: each visible 3.0 sidebar item now opens its
+            own page, not the Admin Command Center page. Admin Command
+            Center itself is unchanged and still reachable from its own
+            item. The same master-admin gate applies: non-masters get the
+            honest unavailable panel, never the real page. */}
+        {activeModule === 'consent_gates' && (
           access?.isMasterAdmin ? (
-            <AdminCommandCenter
-              initialTab="outreach"
-              focusSection={activeModule === 'consent_gates' ? 'gates' : activeModule === 'after_call' ? 'aftercall' : 'owner'}
+            <ConsentGatesPage />
+          ) : (
+            <AdminUnavailablePanel
+              serverReachable={access !== null}
+              signedInEmail={currentUser?.email ?? profile?.email ?? null}
             />
+          )
+        )}
+        {activeModule === 'after_call' && (
+          access?.isMasterAdmin ? (
+            <AfterCallPage />
+          ) : (
+            <AdminUnavailablePanel
+              serverReachable={access !== null}
+              signedInEmail={currentUser?.email ?? profile?.email ?? null}
+            />
+          )
+        )}
+        {activeModule === 'owner_dashboard' && (
+          access?.isMasterAdmin ? (
+            <OwnerDashboardPage />
           ) : (
             <AdminUnavailablePanel
               serverReachable={access !== null}

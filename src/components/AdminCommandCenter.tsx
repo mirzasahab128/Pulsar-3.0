@@ -344,7 +344,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
       {/* ---------------------------- Overview tab ----------------------------- */}
       {tab === 'overview' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             {[
               { label: 'Total users', value: overview?.totalUsers ?? 0 },
               { label: 'Active', value: overview?.byStatus?.active ?? 0 },
@@ -404,8 +404,8 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
           <div className={`p-3 rounded-xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-slate-200 bg-slate-50'}`}>
             <div className="text-xs font-bold mb-2 flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> Create user</div>
             <div className="flex flex-wrap gap-2 items-center">
-              <input value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="email@company.com" className={`${inputCls} w-52`} />
-              <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Display name" className={`${inputCls} w-40`} />
+              <input value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="email@company.com" className={`${inputCls} w-full sm:w-52`} />
+              <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Display name" className={`${inputCls} w-full sm:w-40`} />
               <select value={newPlanId || defaultPlanId} onChange={e => setNewPlanId(e.target.value)} className={inputCls}>
                 {plans.map(p => <option key={p.id} value={p.id}>{p.name}{p.isDefault ? ' (default)' : ''}</option>)}
               </select>
@@ -663,7 +663,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
 
       {/* ----------------------------- Plans tab ------------------------------- */}
       {tab === 'plans' && (
-        <div className="grid md:grid-cols-[240px_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4">
           <div className={`${cardCls} p-3 space-y-2`}>
             {plans.map(p => (
               <button
@@ -716,13 +716,13 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
                   <input
                     value={editingPlan.name}
                     onChange={e => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                    className={`${inputCls} w-44`}
+                    className={`${inputCls} w-full sm:w-44`}
                     placeholder="Plan name"
                   />
                   <input
                     value={editingPlan.priceNote}
                     onChange={e => setEditingPlan({ ...editingPlan, priceNote: e.target.value })}
-                    className={`${inputCls} w-44`}
+                    className={`${inputCls} w-full sm:w-44`}
                     placeholder="Price note (free text)"
                   />
                   <label className="flex items-center gap-1.5 text-xs">
@@ -828,7 +828,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
               value={newAdminEmail}
               onChange={e => setNewAdminEmail(e.target.value)}
               placeholder="new-admin@company.com"
-              className={`${inputCls} w-64`}
+              className={`${inputCls} w-full sm:w-64`}
             />
             <button
               onClick={() => runAction(async () => {
@@ -869,9 +869,9 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
           <div className={`${cardCls} p-4 space-y-3`}>
             <div className="text-xs font-bold">Check the gate for a contact</div>
             <div className="flex flex-wrap gap-2 items-center">
-              <input value={gateContactId} onChange={e => setGateContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-40`} />
-              <input value={gateEmail} onChange={e => setGateEmail(e.target.value)} placeholder="email@company.com" className={`${inputCls} w-52`} />
-              <input value={gatePhone} onChange={e => setGatePhone(e.target.value)} placeholder="+1 phone" className={`${inputCls} w-40`} />
+              <input value={gateContactId} onChange={e => setGateContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-full sm:w-40`} />
+              <input value={gateEmail} onChange={e => setGateEmail(e.target.value)} placeholder="email@company.com" className={`${inputCls} w-full sm:w-52`} />
+              <input value={gatePhone} onChange={e => setGatePhone(e.target.value)} placeholder="+1 phone" className={`${inputCls} w-full sm:w-40`} />
               <select value={gateLineType} onChange={e => setGateLineType(e.target.value)} className={inputCls}>
                 <option value="mobile">Mobile</option>
                 <option value="landline">Landline</option>
@@ -911,7 +911,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
           <div className={`${cardCls} p-4 space-y-3`}>
             <div className="text-xs font-bold">Consent ledger</div>
             <div className="flex flex-wrap gap-2 items-center">
-              <input value={consentContactId} onChange={e => setConsentContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-40`} />
+              <input value={consentContactId} onChange={e => setConsentContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-full sm:w-40`} />
               <select value={consentChannel} onChange={e => { setConsentChannel(e.target.value); setConsentType(e.target.value === 'voice' ? 'pewc' : e.target.value === 'email' ? 'email_optin' : 'sms_optin'); }} className={inputCls}>
                 <option value="voice">Voice</option>
                 <option value="email">Email</option>
@@ -922,7 +922,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
                 {consentChannel === 'email' && (<option value="email_optin">Email opt-in</option>)}
                 {consentChannel === 'sms' && (<option value="sms_optin">SMS opt-in</option>)}
               </select>
-              <input value={consentSource} onChange={e => setConsentSource(e.target.value)} placeholder="Source, e.g. web form" className={`${inputCls} w-44`} />
+              <input value={consentSource} onChange={e => setConsentSource(e.target.value)} placeholder="Source, e.g. web form" className={`${inputCls} w-full sm:w-44`} />
               <button onClick={() => runAction(async () => { await apiService.grantPhase71Consent({ contactId: consentContactId, channel: consentChannel, type: consentType, source: consentSource }); }, 'Consent granted')} className={`${btnCls} bg-emerald-600 text-white hover:bg-emerald-500`}>Grant</button>
               <button onClick={() => runAction(async () => { await apiService.revokePhase71Consent({ contactId: consentContactId, source: consentSource || 'admin revoke' }); }, 'Consent revoked on all channels')} className={`${btnCls} text-rose-500 border border-rose-500/40 hover:bg-rose-500/10`}>Revoke all channels</button>
             </div>
@@ -947,7 +947,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
                 <option value="email">Email</option>
                 <option value="contact">Contact ID</option>
               </select>
-              <input value={suppValue} onChange={e => setSuppValue(e.target.value)} placeholder="Phone, email, or contact ID" className={`${inputCls} w-52`} />
+              <input value={suppValue} onChange={e => setSuppValue(e.target.value)} placeholder="Phone, email, or contact ID" className={`${inputCls} w-full sm:w-52`} />
               <button onClick={() => runAction(async () => { await apiService.addPhase71Suppression({ identifierType: suppType, identifier: suppValue, reason: 'manual', source: 'admin' }); setSuppValue(''); }, 'Suppression added')} className={`${btnCls} bg-violet-600 text-white hover:bg-violet-500`}>Add</button>
             </div>
             <div className="space-y-1">
@@ -1002,7 +1002,7 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
               {(phase73?.tasks ?? []).filter((t: any) => t.status === 'pending').length === 0 && <div className="text-xs text-slate-500">No pending follow-up tasks.</div>}
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <input value={optOutContactId} onChange={e => setOptOutContactId(e.target.value)} placeholder="Contact ID to opt out" className={`${inputCls} w-52`} />
+              <input value={optOutContactId} onChange={e => setOptOutContactId(e.target.value)} placeholder="Contact ID to opt out" className={`${inputCls} w-full sm:w-52`} />
               <button onClick={() => runAction(async () => { await apiService.applyPhase73OptOut({ contactId: optOutContactId, source: 'admin opt-out' }); setOptOutContactId(''); }, 'Opt-out applied on all channels')} className={`${btnCls} text-rose-500 border border-rose-500/40 hover:bg-rose-500/10`}>Opt out on all channels</button>
             </div>
           </div>
@@ -1043,8 +1043,8 @@ export const AdminCommandCenter: React.FC<{ initialTab?: AdminTab; focusSection?
               </div>
             ))}
             <div className="flex flex-wrap gap-2 items-center">
-              <input value={outcomeContactId} onChange={e => setOutcomeContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-52`} />
-              <input value={outcomeReason} onChange={e => setOutcomeReason(e.target.value)} placeholder="Short reason (optional)" className={`${inputCls} w-52`} />
+              <input value={outcomeContactId} onChange={e => setOutcomeContactId(e.target.value)} placeholder="Contact ID" className={`${inputCls} w-full sm:w-52`} />
+              <input value={outcomeReason} onChange={e => setOutcomeReason(e.target.value)} placeholder="Short reason (optional)" className={`${inputCls} w-full sm:w-52`} />
               <button onClick={() => runAction(async () => { await apiService.markPhase74Outcome({ contactId: outcomeContactId, outcome: 'closed_won', reason: outcomeReason }); setOutcomeContactId(''); setOutcomeReason(''); }, 'Lead marked won, follow-ups stopped')} className={`${btnCls} text-emerald-500 border border-emerald-500/40 hover:bg-emerald-500/10`}>Mark won</button>
               <button onClick={() => runAction(async () => { await apiService.markPhase74Outcome({ contactId: outcomeContactId, outcome: 'closed_lost', reason: outcomeReason }); setOutcomeContactId(''); setOutcomeReason(''); }, 'Lead marked lost, follow-ups stopped')} className={`${btnCls} text-rose-500 border border-rose-500/40 hover:bg-rose-500/10`}>Mark lost</button>
             </div>

@@ -221,3 +221,17 @@ Same sidebar style, colours, and layout as the live look. Only three items added
 - Outreach, after Consent Gates: After-call follow-up, opens the same tab, Phase 7.3 section.
 - Administration, after Admin Command Center: Owner dashboard, opens the same tab, Phase 7.4 section.
 No existing sidebar item was removed, renamed, moved, or restyled. Calling and Voice Studio carries a short gate-first note, with no layout change. Non-master users see the same honest unavailable panel as for Admin Command Center, because the server gate still applies.
+
+## Separate pages and mobile responsiveness (2026-10-29, not yet pushed)
+- The three visible NEW sidebar items now open three separate pages, not the
+  Admin Command Center page: Consent Gates, After-call follow-up, and Owner
+  dashboard. Admin Command Center itself is unchanged and still reachable
+  from its own sidebar item. All three pages reuse the existing Phase 7
+  apiService methods and server actions; no sending or calling logic was
+  duplicated, and drafts stay drafts.
+- Mobile responsiveness: grids in Dashboard, Pipeline, Network, Sales/BD,
+  Lead lists, Call Studio, and Admin now stack to one column on narrow
+  phones and expand on larger screens, Admin form inputs are full width on
+  mobile, and a new responsive-3.0.css safety net stops media and long
+  words from pushing the page sideways. Colours and theme were not changed.
+  No screen, tab, or button was removed.

@@ -395,7 +395,7 @@ export const NetworkBuilderMatrix: React.FC<NetworkBuilderMatrixProps> = ({
             </div>
 
             {/* Decision Maker Metadata Chips */}
-            <div className="grid grid-cols-2 gap-2 mt-4 text-[11px] font-mono">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-[11px] font-mono">
               <div className={`p-2.5 rounded-xl border ${
                 isDark ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200'
               }`}>

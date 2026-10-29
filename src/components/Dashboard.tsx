@@ -174,7 +174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       />
 
       {/* 3. Horizontal Business-Growth KPI Strip (5 Scannable Metrics) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         
         {/* KPI 1: Prospects Discovered */}
         <div className="pv-card pv-card-hover p-5">

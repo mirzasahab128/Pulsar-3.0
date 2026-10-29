@@ -1,0 +1,49 @@
+/* Pulsar 3.0 mobile responsiveness only. No colour, theme, or layout
+   identity changes: this file only stops fixed widths from overflowing a
+   narrow screen, lets media and long words shrink, and keeps tables
+   scrollable inside their own card instead of pushing the whole page
+   sideways. Existing screens are left working; nothing is removed. */
+
+.pv-shell img,
+.pv-shell video,
+.pv-shell canvas {
+  max-width: 100%;
+}
+
+.pv-shell .pv-card,
+.pv-shell .pv-lg {
+  min-width: 0;
+}
+
+.pv-shell .pv-card {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pv-shell table {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  /* Cards, boxes, and grids stack instead of squeezing side by side.
+     Tailwind grid classes on the worst offenders were also changed to
+     one column on mobile; this rule is a safety net for any grid that
+     still uses a fixed multi-column layout inside a card. */
+  .pv-shell .pv-card .grid {
+    min-width: 0;
+  }
+  .pv-shell .pv-card {
+    overflow-x: auto;
+  }
+  /* The mobile bottom dock already exists; keep the last card clear of it. */
+  .pv-shell {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Small landscape phones keep scrolling cleanly instead of clipping. */
+  .pv-shell {
+    overflow-y: auto;
+  }
+}

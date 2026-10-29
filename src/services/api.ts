@@ -875,6 +875,14 @@ All ${params.stats.warmTransfersBridged} connected calls were immediately bridge
     return data;
   },
 
+  async searchLeadPrepPlaces(payload: { industry: string; place: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/places-search', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to search Google Places');
+    return data;
+  },
+
   /** Set per-user feature overrides: true = grant, false = revoke,
    *  null = clear (fall back to the plan). Returns the updated record. */
   async setUserFeatureOverrides(uid: string, overrides: Record<string, boolean | null>): Promise<PlatformUserRecord> {

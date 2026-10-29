@@ -35,6 +35,7 @@ import type { BillingSubscription } from './billing.js';
 import type { EmailCheckResult } from './leadVerification.js';
 import type { CompanyBrief } from './companyResearch.js';
 import type { WatchlistItem, Signal } from './signalMonitor.js';
+import type { PlacesLeadDraft } from './places.js';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -224,6 +225,8 @@ export interface LeadPrepState {
   companyBriefs: CompanyBrief[];
   watches: WatchlistItem[];
   signals: Signal[];
+  /** Google Places drafts. Preparation only, never a verified contact. */
+  placesDrafts: PlacesLeadDraft[];
 }
 
 export interface PlatformState {
@@ -293,7 +296,7 @@ export function emptyPlatformState(): PlatformState {
     phase73: { pipeline: {}, tasks: [], drafts: [], ownerSummaries: [] },
     phase74: { actions: [] },
     billing: { subscriptions: {} },
-    leadPrep: { emailChecks: [], companyBriefs: [], watches: [], signals: [] }
+    leadPrep: { emailChecks: [], companyBriefs: [], watches: [], signals: [], placesDrafts: [] }
   };
 }
 
@@ -332,7 +335,11 @@ export function getPlatformState(): PlatformState {
   // Migration: states persisted before lead prep have no lead prep state.
   if (!state.leadPrep || !Array.isArray(state.leadPrep.emailChecks) || !Array.isArray(state.leadPrep.companyBriefs)
     || !Array.isArray(state.leadPrep.watches) || !Array.isArray(state.leadPrep.signals)) {
-    state.leadPrep = { emailChecks: [], companyBriefs: [], watches: [], signals: [] };
+    state.leadPrep = { emailChecks: [], companyBriefs: [], watches: [], signals: [], placesDrafts: [] };
+  }
+  // Migration: states persisted before Places have no places drafts list.
+  if (!Array.isArray((state.leadPrep as LeadPrepState).placesDrafts)) {
+    (state.leadPrep as LeadPrepState).placesDrafts = [];
   }
   return state;
 }

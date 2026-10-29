@@ -27,6 +27,9 @@ export function LeadPrepPage() {
   const [watchLabel, setWatchLabel] = useState('');
   const [watchKind, setWatchKind] = useState('rss_feed');
   const [watchSource, setWatchSource] = useState('');
+  const [placesIndustry, setPlacesIndustry] = useState('');
+  const [placesPlace, setPlacesPlace] = useState('');
+  const [placesResult, setPlacesResult] = useState<any>(null);
   const [signalWatchId, setSignalWatchId] = useState('');
   const [signalTitle, setSignalTitle] = useState('');
   const [signalBody, setSignalBody] = useState('');
@@ -59,6 +62,8 @@ export function LeadPrepPage() {
           <span className={pillCls}>Signals: {data?.counts?.signals ?? 0}</span>
           <span className={pillCls}>Live verification: No</span>
           <span className={pillCls}>Live fetch: No</span>
+          <span className={pillCls}>Places drafts: {data?.counts?.placesDrafts ?? 0}</span>
+          <span className={pillCls}>Live Places: {data?.placesKeyConfigured ? 'Key set on server' : 'Off until a server key is set'}</span>
         </div>
       </div>
 
@@ -101,6 +106,30 @@ export function LeadPrepPage() {
             <p>Pain themes: {briefResult.painThemes.join(', ') || 'None found.'}</p>
           </div>
         )}
+      </div>
+
+      <div className={cardCls}>
+        <div className="text-sm font-bold">Google Places search</div>
+        <p className="text-xs text-[var(--pv-muted)] mt-1 break-words">Live Places is off until a server key is set. No key is entered here, and no key is ever shown in this page. One search at a time, up to 20 results, no bulk search, no automatic follow-on search. A Places result is a draft only: it is not a verified contact and it never authorises contact. The lead verification step and the permission check must still pass first, and opt out stops email, text, and call at once.</p>
+        <div className="mt-3 flex flex-col sm:flex-row flex-wrap gap-2">
+          <input value={placesIndustry} onChange={e => setPlacesIndustry(e.target.value)} placeholder="Industry, e.g. dental clinics" className={inputCls} />
+          <input value={placesPlace} onChange={e => setPlacesPlace(e.target.value)} placeholder="Place, e.g. Austin, TX" className={inputCls} />
+          <button onClick={() => run(async () => { const out = await apiService.searchLeadPrepPlaces({ industry: placesIndustry, place: placesPlace }); setPlacesResult(out); }, 'Places search done')} className={`${btnCls} bg-violet-600 text-white hover:bg-violet-500`}>Search Places</button>
+        </div>
+        {placesResult && (
+          <div className="text-sm p-3 rounded-xl border border-[var(--pv-border)] bg-[var(--pv-card-soft)] mt-3 break-words">
+            Found {placesResult.totalReturned} places, kept {placesResult.drafts.length} drafts, removed {placesResult.duplicatesRemoved} duplicates, capped at {placesResult.cappedAt}.
+          </div>
+        )}
+        <div className="mt-3 space-y-2">
+          {(data?.placesDrafts || []).slice(-20).map((d: any) => (
+            <div key={d.id} className="text-sm p-3 rounded-xl border border-[var(--pv-border)] bg-[var(--pv-card-soft)] break-words">
+              <span className="font-bold">{d.name || 'Name not returned'}</span> ({d.status})
+              <br />{d.address || 'Address not returned'} {d.phone ? `| ${d.phone}` : '| Phone not returned'} {d.website ? `| ${d.website}` : '| Website not returned'}
+              <br />Rating: {d.rating ?? 'Not returned'} | Reviews: {d.reviewCount ?? 'Not returned'} | Source: Google Places, place id {d.provenance?.placeId || 'not returned'}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className={cardCls}>

@@ -118,6 +118,15 @@ import {
   addWatch as addSignalWatch,
   classifySuppliedItem
 } from './server/signalMonitor.js';
+import {
+  PLACES_MAX_RESULTS,
+  PLACES_NOT_CONFIGURED_MESSAGE,
+  createGooglePlacesProvider,
+  dedupePlacesDrafts,
+  getPlacesApiKey,
+  searchPlacesWithProvider,
+  validatePlacesSearchInput
+} from './server/places.js';
 import crypto from 'crypto';
 import { 
   sendEmailViaResend, 
@@ -2668,11 +2677,14 @@ app.get('/api/admin/lead-prep/overview', requireMasterAdmin, ah(async (_req, res
     companyBriefs: state.leadPrep.companyBriefs.slice(-50),
     watches: state.leadPrep.watches,
     signals: state.leadPrep.signals.slice(-100),
+    placesDrafts: state.leadPrep.placesDrafts.slice(-100),
+    placesKeyConfigured: getPlacesApiKey() !== null,
     counts: {
       emailChecks: state.leadPrep.emailChecks.length,
       companyBriefs: state.leadPrep.companyBriefs.length,
       watches: state.leadPrep.watches.length,
-      signals: state.leadPrep.signals.length
+      signals: state.leadPrep.signals.length,
+      placesDrafts: state.leadPrep.placesDrafts.length
     }
   });
 }));
@@ -2738,6 +2750,51 @@ app.post('/api/admin/lead-prep/signal', requireMasterAdmin, ah(async (req, res) 
   writeAudit(state, actorOf(req).email, 'leadprep.signal', signal.title, `kind=${signal.kind} contact_authorised=false`);
   persistPlatform();
   return res.status(201).json({ success: true, signal });
+}));
+
+// Google Places search, master-admin only, server side only. The key is
+// read from the server environment and sent only in the Places header.
+// It is never logged, never stored, and never sent to the browser. A
+// draft is preparation only: not a verified contact, and it never
+// authorises contact. The verification step and the Phase 7 consent
+// gate must still pass first, and an opt-out stops all channels.
+app.post('/api/admin/lead-prep/places-search', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { industry: 'string', place: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const industry = String(req.body.industry || '');
+  const place = String(req.body.place || '');
+  const validation = validatePlacesSearchInput({ industry, place });
+  if (validation) return badRequest(res, validation);
+  const apiKey = getPlacesApiKey();
+  if (!apiKey) {
+    return res.status(503).json({ success: false, livePlaces: false, error: PLACES_NOT_CONFIGURED_MESSAGE });
+  }
+  const state = getPlatformState();
+  let provider;
+  try {
+    provider = createGooglePlacesProvider(apiKey);
+  } catch (e: any) {
+    return res.status(503).json({ success: false, livePlaces: false, error: e?.message || PLACES_NOT_CONFIGURED_MESSAGE });
+  }
+  let result;
+  try {
+    result = await searchPlacesWithProvider(provider, { industry, place });
+  } catch (e: any) {
+    return res.status(502).json({ success: false, livePlaces: false, error: e?.message || 'Google Places search failed' });
+  }
+  const merged = dedupePlacesDrafts([...state.leadPrep.placesDrafts, ...result.drafts]);
+  const newlyStored = merged.drafts.length - state.leadPrep.placesDrafts.length;
+  state.leadPrep.placesDrafts = merged.drafts;
+  writeAudit(state, actorOf(req).email, 'leadprep.places_search', `${industry.trim()} in ${place.trim()}`, `drafts=${result.drafts.length} newly_stored=${newlyStored} cap=${PLACES_MAX_RESULTS} live=true`);
+  persistPlatform();
+  return res.json({
+    success: true,
+    livePlaces: true,
+    drafts: result.drafts,
+    totalReturned: result.totalReturned,
+    duplicatesRemoved: result.duplicatesRemoved,
+    cappedAt: result.cappedAt
+  });
 }));
 
 // --- Dashboard: snapshot sync + stats (prompt Part 2) --------------------------

@@ -108,6 +108,16 @@ import {
   trialDaysRemaining,
   type BillingPlanId
 } from './server/billing.js';
+import {
+  validateEmailAddress
+} from './server/leadVerification.js';
+import {
+  buildCompanyBrief
+} from './server/companyResearch.js';
+import {
+  addWatch as addSignalWatch,
+  classifySuppliedItem
+} from './server/signalMonitor.js';
 import crypto from 'crypto';
 import { 
   sendEmailViaResend, 
@@ -2640,6 +2650,94 @@ app.post('/api/admin/billing/test-checkout', requireMasterAdmin, ah(async (req, 
   if (!workspaceId) return badRequest(res, 'WORKSPACE_ID_REQUIRED');
   if (!getBillingPlan(planId)) return badRequest(res, 'UNKNOWN_PLAN');
   return res.json({ success: true, testMode: true, charged: false, session: createTestCheckoutSession(workspaceId, planId) });
+}));
+
+// --- Lead prep: email shape check, company brief, signal monitor -------------
+// Master-admin only. Read-only preparation: nothing here sends, calls,
+// fetches a page, or authorises contact. Email results are shape checks
+// only, company briefs come from user-supplied text only, and signals
+// come from supplied items only. The Phase 7 consent gate still decides
+// every contact, and an opt-out stops all channels at once.
+app.get('/api/admin/lead-prep/overview', requireMasterAdmin, ah(async (_req, res) => {
+  const state = getPlatformState();
+  return res.json({
+    success: true,
+    liveVerification: false,
+    liveFetch: false,
+    emailChecks: state.leadPrep.emailChecks.slice(-50),
+    companyBriefs: state.leadPrep.companyBriefs.slice(-50),
+    watches: state.leadPrep.watches,
+    signals: state.leadPrep.signals.slice(-100),
+    counts: {
+      emailChecks: state.leadPrep.emailChecks.length,
+      companyBriefs: state.leadPrep.companyBriefs.length,
+      watches: state.leadPrep.watches.length,
+      signals: state.leadPrep.signals.length
+    }
+  });
+}));
+
+app.post('/api/admin/lead-prep/email-check', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { email: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const state = getPlatformState();
+  const result = validateEmailAddress({ email: String(req.body.email || ''), contactId: req.body.contactId || null });
+  state.leadPrep.emailChecks.push(result);
+  writeAudit(state, actorOf(req).email, 'leadprep.email_check', result.email, `verdict=${result.verdict} shape only, no live check`);
+  persistPlatform();
+  return res.status(201).json({ success: true, result });
+}));
+
+app.post('/api/admin/lead-prep/company-brief', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { companyName: 'string', pageText: 'string', source: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const state = getPlatformState();
+  const brief = buildCompanyBrief({
+    companyName: String(req.body.companyName || ''),
+    pageText: String(req.body.pageText || ''),
+    source: String(req.body.source || ''),
+    sourceUrl: req.body.sourceUrl || null,
+    suppliedBy: actorOf(req).email
+  });
+  state.leadPrep.companyBriefs.push(brief);
+  writeAudit(state, actorOf(req).email, 'leadprep.company_brief', brief.companyName, 'brief from supplied text only, nothing fetched');
+  persistPlatform();
+  return res.status(201).json({ success: true, brief });
+}));
+
+app.post('/api/admin/lead-prep/watch', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { kind: 'string', label: 'string', source: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const state = getPlatformState();
+  const result = addSignalWatch(state.leadPrep.watches, {
+    kind: req.body.kind,
+    label: String(req.body.label || ''),
+    source: String(req.body.source || ''),
+    addedBy: actorOf(req).email
+  });
+  if (!result.ok) return badRequest(res, result.error);
+  writeAudit(state, actorOf(req).email, 'leadprep.watch_add', result.watch.label, `kind=${result.watch.kind}`);
+  persistPlatform();
+  return res.status(201).json({ success: true, watch: result.watch });
+}));
+
+app.post('/api/admin/lead-prep/signal', requireMasterAdmin, ah(async (req, res) => {
+  const fieldErr = validateFields(req.body, { watchId: 'string', title: 'string', body: 'string', source: 'string' });
+  if (fieldErr) return badRequest(res, fieldErr);
+  const state = getPlatformState();
+  const watch = state.leadPrep.watches.find(w => w.id === req.body.watchId);
+  if (!watch) return badRequest(res, 'WATCH_NOT_FOUND');
+  const signal = classifySuppliedItem({
+    watchId: String(req.body.watchId),
+    title: String(req.body.title || ''),
+    body: String(req.body.body || ''),
+    publishedAt: req.body.publishedAt || null,
+    source: String(req.body.source || '')
+  });
+  state.leadPrep.signals.push(signal);
+  writeAudit(state, actorOf(req).email, 'leadprep.signal', signal.title, `kind=${signal.kind} contact_authorised=false`);
+  persistPlatform();
+  return res.status(201).json({ success: true, signal });
 }));
 
 // --- Dashboard: snapshot sync + stats (prompt Part 2) --------------------------

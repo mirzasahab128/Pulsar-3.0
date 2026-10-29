@@ -41,6 +41,7 @@ import { SpatialSidebar } from './components/SpatialSidebar';
 import { AdminCommandCenter } from './components/AdminCommandCenter';
 import { ConsentGatesPage, AfterCallPage, OwnerDashboardPage } from './components/Phase7Pages';
 import { BillingPage } from './components/BillingPage';
+import { LeadPrepPage } from './components/LeadPrepPage';
 import { AdminUnavailablePanel } from './components/AdminUnavailablePanel';
 import { PipelineWorkspace } from './components/PipelineWorkspace';
 import { SpatialCommandBar } from './components/SpatialCommandBar';
@@ -1057,6 +1058,21 @@ export default function App() {
         {activeModule === 'owner_dashboard' && (
           access?.isMasterAdmin ? (
             <OwnerDashboardPage />
+          ) : (
+            <AdminUnavailablePanel
+              serverReachable={access !== null}
+              signedInEmail={currentUser?.email ?? profile?.email ?? null}
+            />
+          )
+        )}
+
+        {/* Lead prep and signals: same master-admin gate as the Phase 7
+            pages. Non-masters get the honest unavailable panel, never the
+            real page. Nothing here sends, calls, fetches, or authorises
+            contact. */}
+        {activeModule === 'lead_prep' && (
+          access?.isMasterAdmin ? (
+            <LeadPrepPage />
           ) : (
             <AdminUnavailablePanel
               serverReachable={access !== null}

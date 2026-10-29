@@ -332,6 +332,7 @@ export type PulsarSpatialModule =
   | 'pipeline_ops'
   | 'consent_gates'
   | 'after_call'
+  | 'lead_prep'
   | 'owner_dashboard'
   | 'billing'
   | 'permissions'

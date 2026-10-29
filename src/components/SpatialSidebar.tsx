@@ -135,6 +135,7 @@ export const SpatialSidebar: React.FC<SpatialSidebarProps> = ({
         { id: 'reminders', label: 'Follow-ups & Tasks', icon: Bell, count: unreadTasksCount, badgeVariant: 'amber' },
         { id: 'consent_gates', label: 'Consent Gates', icon: ShieldCheck, isNew: true },
         { id: 'after_call', label: 'After-call follow-up', icon: PhoneCall, isNew: true },
+        { id: 'lead_prep', label: 'Lead prep and signals', icon: Search, isNew: true },
         { id: 'google_tasks', label: 'Google Tasks Sync', icon: CheckSquare, badgeVariant: 'cyan', feature: 'google_sync' },
         { id: 'google_forms', label: 'Google Forms & Audits', icon: ClipboardList, badgeVariant: 'cyan', feature: 'google_sync' }
       ]

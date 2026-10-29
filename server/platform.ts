@@ -32,6 +32,9 @@ import type { ConsentRecord, SuppressionRecord } from './contactGate.js';
 import type { DraftMessage, FollowUpTask, OwnerSummary, PipelineStage } from './afterCall.js';
 import type { OwnerAction } from './ownerDashboard.js';
 import type { BillingSubscription } from './billing.js';
+import type { EmailCheckResult } from './leadVerification.js';
+import type { CompanyBrief } from './companyResearch.js';
+import type { WatchlistItem, Signal } from './signalMonitor.js';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -212,6 +215,17 @@ export interface BillingState {
   subscriptions: Record<string, BillingSubscription>;
 }
 
+/** Lead prep: read-only preparation, never permission. Email checks
+ *  are shape checks only, company briefs come from user-supplied
+ *  text only, and signals come from supplied items only. None of
+ *  these authorise contact; the Phase 7 consent gate still decides. */
+export interface LeadPrepState {
+  emailChecks: EmailCheckResult[];
+  companyBriefs: CompanyBrief[];
+  watches: WatchlistItem[];
+  signals: Signal[];
+}
+
 export interface PlatformState {
   users: Record<string, PlatformUser>;
   plans: Record<string, Plan>;
@@ -224,6 +238,7 @@ export interface PlatformState {
   phase73: Phase73State;
   phase74: Phase74State;
   billing: BillingState;
+  leadPrep: LeadPrepState;
 }
 
 // ---------------------------------------------------------------------------
@@ -277,7 +292,8 @@ export function emptyPlatformState(): PlatformState {
     phase71: { consents: [], suppressions: [] },
     phase73: { pipeline: {}, tasks: [], drafts: [], ownerSummaries: [] },
     phase74: { actions: [] },
-    billing: { subscriptions: {} }
+    billing: { subscriptions: {} },
+    leadPrep: { emailChecks: [], companyBriefs: [], watches: [], signals: [] }
   };
 }
 
@@ -312,6 +328,11 @@ export function getPlatformState(): PlatformState {
   // Migration: states persisted before billing have no billing state.
   if (!state.billing || typeof state.billing.subscriptions !== 'object') {
     state.billing = { subscriptions: {} };
+  }
+  // Migration: states persisted before lead prep have no lead prep state.
+  if (!state.leadPrep || !Array.isArray(state.leadPrep.emailChecks) || !Array.isArray(state.leadPrep.companyBriefs)
+    || !Array.isArray(state.leadPrep.watches) || !Array.isArray(state.leadPrep.signals)) {
+    state.leadPrep = { emailChecks: [], companyBriefs: [], watches: [], signals: [] };
   }
   return state;
 }

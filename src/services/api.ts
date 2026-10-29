@@ -833,6 +833,48 @@ All ${params.stats.warmTransfersBridged} connected calls were immediately bridge
     return data;
   },
 
+  /** Lead prep: shape checks, supplied-text briefs, and supplied signals only.
+   *  Nothing here sends, calls, fetches, or authorises contact. */
+  async getLeadPrepOverview(): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/overview', { headers });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load lead prep');
+    return data;
+  },
+
+  async checkLeadPrepEmail(payload: { email: string; contactId?: string | null }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/email-check', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to check email');
+    return data;
+  },
+
+  async createLeadPrepBrief(payload: { companyName: string; pageText: string; source: string; sourceUrl?: string | null }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/company-brief', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to create company brief');
+    return data;
+  },
+
+  async addLeadPrepWatch(payload: { kind: string; label: string; source: string }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/watch', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to add watch');
+    return data;
+  },
+
+  async addLeadPrepSignal(payload: { watchId: string; title: string; body: string; source: string; publishedAt?: string | null }): Promise<any> {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/admin/lead-prep/signal', { method: 'POST', headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to add signal');
+    return data;
+  },
+
   /** Set per-user feature overrides: true = grant, false = revoke,
    *  null = clear (fall back to the plan). Returns the updated record. */
   async setUserFeatureOverrides(uid: string, overrides: Record<string, boolean | null>): Promise<PlatformUserRecord> {
